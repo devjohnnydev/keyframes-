@@ -118,7 +118,8 @@ const DashboardAdmin = () => {
         if (value === undefined || value === '') return;
         try {
             await setStudentGrade(studentId, activityId, value);
-            alert('Nota salva e aluno notificado!');
+            // Removido o alert para não interromper o professor ao digitar várias notas
+            // Pode ser adicionado um toast de sucesso no futuro
         } catch (err) {
             alert('Erro ao salvar nota');
         }
@@ -492,10 +493,10 @@ const DashboardAdmin = () => {
                 )}
 
                 {tab === 'atividades' && (
-                    <div style={{ display: 'grid', gap: '2rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '100%', minWidth: 0 }}>
                         <div className="glass-card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)' }}>
                             <h3 style={{ marginBottom: '1.5rem' }}>Lançar Nova Missão</h3>
-                            <form onSubmit={handleAddActivity} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
+                            <form onSubmit={handleAddActivity} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'end' }}>
                                 <div>
                                     <label style={{ fontSize: '0.8rem', opacity: 0.7 }}>Título</label>
                                     <input className="input-field" placeholder="Ex: Prova de Backend" value={newActivity.titulo} onChange={e => setNewActivity({ ...newActivity, titulo: e.target.value })} required />
@@ -509,9 +510,9 @@ const DashboardAdmin = () => {
                             {!selectedClass && <p style={{ color: 'var(--danger)', fontSize: '0.7rem', marginTop: '0.5rem' }}>* Selecione uma turma primeiro para lançar atividades.</p>}
                         </div>
 
-                        <div>
+                        <div className="glass-card" style={{ padding: '1.5rem', background: 'rgba(255, 255, 255, 0.02)', width: '100%', overflow: 'hidden' }}>
                             <h3 style={{ marginBottom: '1.5rem' }}>Avaliar Aventureiros</h3>
-                            <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem' }}>
+                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', paddingBottom: '1rem' }}>
                                 {filteredActivities.map(a => (
                                     <button
                                         key={a.id}
@@ -526,8 +527,8 @@ const DashboardAdmin = () => {
                             </div>
 
                             {selectedActivity && (
-                                <div style={{ marginTop: '2rem', overflowX: 'auto' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <div style={{ marginTop: '2rem', overflowX: 'auto', width: '100%' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '500px' }}>
                                         <thead>
                                             <tr style={{ textAlign: 'left', color: 'var(--text-muted)' }}>
                                                 <th style={{ padding: '1rem' }}>ALUNO</th>
@@ -552,6 +553,7 @@ const DashboardAdmin = () => {
                                                                 style={{ width: '80px', padding: '0.4rem' }}
                                                                 value={editGrades[`${s.id}-${selectedActivity.id}`] || ''}
                                                                 onChange={e => setEditGrades({ ...editGrades, [`${s.id}-${selectedActivity.id}`]: e.target.value })}
+                                                                onBlur={() => handleSetGrade(s.id, selectedActivity.id)}
                                                             />
                                                         </td>
                                                         <td style={{ padding: '1rem' }}>
@@ -735,7 +737,7 @@ const StudentGradeRow = ({ student, missionId, onSave }) => {
     const [saved, setSaved] = useState(false);
 
     const handleSave = async () => {
-        if (grade === '' || isNaN(grade)) return alert('Digite uma nota válida');
+        if (grade === '' || isNaN(grade)) return;
         await onSave(student.id, grade);
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
@@ -759,6 +761,7 @@ const StudentGradeRow = ({ student, missionId, onSave }) => {
                     style={{ width: '80px', textAlign: 'center', padding: '0.4rem' }}
                     value={grade}
                     onChange={e => setGrade(e.target.value)}
+                    onBlur={handleSave}
                     placeholder="-"
                 />
             </td>

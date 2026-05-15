@@ -105,8 +105,15 @@ initAdmin().catch(console.error);
 
 app.post('/api/upload', authenticate, upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
-    const fileUrl = `/public/uploads/${req.file.filename}`;
-    res.json({ url: fileUrl });
+    
+    // Converte o arquivo para Base64 para persistência no banco de dados sem depender do file system local
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64String = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+    
+    // Remove o arquivo local após a conversão
+    fs.unlinkSync(req.file.path);
+
+    res.json({ url: base64String });
 });
 
 // --- AUTH ROUTES ---
