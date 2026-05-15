@@ -597,6 +597,24 @@ app.post('/api/notas', authenticate, authorize(['PROFESSOR']), asyncHandler(asyn
     res.json(grade);
 }));
 
+// Aluno envia reação emoji para uma atividade
+app.patch('/api/notas/reacao', authenticate, authorize(['ALUNO']), asyncHandler(async (req, res) => {
+    const { atividadeId, reacao_emoji } = req.body;
+
+    const nota = await prisma.nota.findUnique({
+        where: { alunoId_atividadeId: { alunoId: req.user.id, atividadeId: parseInt(atividadeId) } }
+    });
+
+    if (!nota) return res.status(404).json({ error: 'Você ainda não tem nota nesta atividade' });
+
+    const updated = await prisma.nota.update({
+        where: { id: nota.id },
+        data: { reacao_emoji }
+    });
+
+    res.json(updated);
+}));
+
 // --- MISSIONS ROUTES ---
 
 app.post('/api/missoes', authenticate, authorize(['PROFESSOR']), asyncHandler(async (req, res) => {

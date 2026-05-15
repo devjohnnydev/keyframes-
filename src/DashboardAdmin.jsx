@@ -541,9 +541,25 @@ const DashboardAdmin = () => {
                                             {filteredStudents.map(s => {
                                                 const grade = selectedActivity.notas?.find(g => g.alunoId === s.id);
                                                 return (
-                                                    <tr key={s.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                        <td style={{ padding: '1rem' }}>{s.nome}</td>
-                                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>{grade ? grade.valor : '—'}</td>
+                                                    <tr key={s.id} style={{
+                                                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                        background: grade
+                                                            ? 'rgba(34, 197, 94, 0.07)'
+                                                            : 'rgba(239, 68, 68, 0.05)',
+                                                        transition: 'background 0.3s'
+                                                    }}>
+                                                        <td style={{ padding: '1rem', fontWeight: grade ? '600' : 'normal', color: grade ? 'white' : 'var(--text-muted)' }}>{s.nome}</td>
+                                                        <td style={{ padding: '1rem', fontWeight: 'bold' }}>
+                                                            {grade ? (
+                                                                <span style={{ background: 'rgba(34,197,94,0.2)', color: '#4ade80', padding: '0.3rem 0.8rem', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.4)' }}>
+                                                                    ✓ {grade.valor}
+                                                                </span>
+                                                            ) : (
+                                                                <span style={{ background: 'rgba(239,68,68,0.15)', color: 'rgba(239,68,68,0.8)', padding: '0.3rem 0.8rem', borderRadius: '8px', border: '1px solid rgba(239,68,68,0.3)', fontSize: '0.75rem' }}>
+                                                                    pendente
+                                                                </span>
+                                                            )}
+                                                        </td>
                                                         <td style={{ padding: '1rem' }}>
                                                             <input
                                                                 className="input-field"

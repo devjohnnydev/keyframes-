@@ -104,8 +104,9 @@ model Missao {
 }
 
 model Nota {
-  id          Int      @id @default(autoincrement())
-  valor       Float
+  id             Int      @id @default(autoincrement())
+  valor          Float
+  reacao_emoji   String?  // Reação do aluno à atividade (ex: "😊", "😕", "🔥")
   
   aluno       Aluno    @relation(fields: [alunoId], references: [id], onDelete: Cascade)
   alunoId     Int

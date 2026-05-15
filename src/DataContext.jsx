@@ -314,6 +314,15 @@ export const DataProvider = ({ children }) => {
       setNeedsRefresh(true);
       return await res.json();
     },
+    sendEmojiReaction: async (atividadeId, reacao_emoji) => {
+      const res = await authFetch(`${API_URL}/notas/reacao`, {
+        method: 'PATCH',
+        body: JSON.stringify({ atividadeId, reacao_emoji })
+      });
+      if (!res.ok) throw new Error("Falha ao enviar reação");
+      setNeedsRefresh(true);
+      return await res.json();
+    },
     refreshAll: () => setNeedsRefresh(true)
   }), [user, token, loading, classes, selectedClass, students, activities, missions, grades, ranking, messages, authFetch]);
 

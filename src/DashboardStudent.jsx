@@ -4,7 +4,7 @@ import { Trophy, Star, MessageSquare, User as UserIcon, LogOut, Award, RefreshCw
 
 const DashboardStudent = () => {
     const {
-        user, logout, ranking, loading, refreshAll, updateStudentProfile, updateStudentPassword, uploadFile, activities, grades, messages, joinClass, markMessageAsRead, missions
+    user, logout, ranking, loading, refreshAll, updateStudentProfile, updateStudentPassword, uploadFile, activities, grades, messages, joinClass, markMessageAsRead, missions, sendEmojiReaction
     } = useData();
 
     const [tab, setTab] = useState('ranking');
@@ -354,25 +354,68 @@ const DashboardStudent = () => {
                         <div style={{ display: 'grid', gap: '1.5rem' }}>
                             {activities.map(activity => {
                                 const myGrade = grades.find(g => g.atividadeId === activity.id);
+                                const EMOJIS = [
+                                    { emoji: '🔥', label: 'Arrasou!' },
+                                    { emoji: '😊', label: 'Gostei' },
+                                    { emoji: '🤔', label: 'Interessante' },
+                                    { emoji: '😕', label: 'Difícil' },
+                                    { emoji: '😭', label: 'Muito difícil' },
+                                    { emoji: '💪', label: 'Desafio aceito!' },
+                                ];
                                 return (
-                                    <div key={activity.id} className="glass-card" style={{ padding: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)' }}>
-                                        <div>
-                                            <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)' }}>{activity.titulo}</h4>
-                                            <p style={{ fontSize: '0.85rem', opacity: 0.7, margin: 0 }}>{activity.descricao || 'Sem descrição.'}</p>
+                                    <div key={activity.id} className="glass-card" style={{
+                                        padding: '1.5rem',
+                                        background: myGrade ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.02)',
+                                        borderLeft: myGrade ? '4px solid var(--success)' : '4px solid rgba(255,255,255,0.1)'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+                                            <div>
+                                                <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--primary)' }}>{activity.titulo}</h4>
+                                                <p style={{ fontSize: '0.85rem', opacity: 0.7, margin: 0 }}>{activity.descricao || 'Sem descrição.'}</p>
+                                            </div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                {myGrade ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
+                                                        <span style={{ fontSize: '1.5rem', fontWeight: '900', color: '#4ade80' }}>{myGrade.valor} / {activity.nota_maxima}</span>
+                                                        <span style={{ fontSize: '0.7rem', color: 'var(--warning)', fontWeight: 'bold' }}>+ {myGrade.valor * 10} XP GANHOS</span>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ opacity: 0.4, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        <RefreshCw size={16} />
+                                                        <span>Aguardando Avaliação</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            {myGrade ? (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
-                                                    <span style={{ fontSize: '1.5rem', fontWeight: '900', color: 'var(--secondary)' }}>{myGrade.valor} / {activity.nota_maxima}</span>
-                                                    <span style={{ fontSize: '0.7rem', color: 'var(--warning)', fontWeight: 'bold' }}>+ {myGrade.valor * 10} XP GANHOS</span>
+                                        {myGrade && (
+                                            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                                                <p style={{ fontSize: '0.75rem', opacity: 0.6, marginBottom: '0.6rem' }}>Como você se sentiu nesta atividade?</p>
+                                                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                    {EMOJIS.map(({ emoji, label }) => (
+                                                        <button
+                                                            key={emoji}
+                                                            title={label}
+                                                            onClick={async () => {
+                                                                try { await sendEmojiReaction(activity.id, emoji); }
+                                                                catch (e) { alert(e.message); }
+                                                            }}
+                                                            style={{
+                                                                fontSize: '1.4rem',
+                                                                background: myGrade.reacao_emoji === emoji ? 'rgba(255,232,31,0.2)' : 'rgba(255,255,255,0.05)',
+                                                                border: myGrade.reacao_emoji === emoji ? '2px solid var(--primary)' : '2px solid transparent',
+                                                                borderRadius: '10px',
+                                                                padding: '0.3rem 0.6rem',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s',
+                                                                transform: myGrade.reacao_emoji === emoji ? 'scale(1.2)' : 'scale(1)'
+                                                            }}
+                                                        >
+                                                            {emoji}
+                                                        </button>
+                                                    ))}
                                                 </div>
-                                            ) : (
-                                                <div style={{ opacity: 0.4, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                    <RefreshCw size={16} />
-                                                    <span>Aguardando Avaliação</span>
-                                                </div>
-                                            )}
-                                        </div>
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}
