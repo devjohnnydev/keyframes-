@@ -120,6 +120,21 @@ const DashboardStudent = () => {
         return ranking.filter(r => r.turmaId === user.turmaId);
     }, [ranking, user?.turmaId]);
 
+    // Show only Top 5 + current user
+    const visibleRanking = useMemo(() => {
+        if (!filteredRanking.length) return [];
+        const top5 = filteredRanking.slice(0, 5);
+        const isUserInTop5 = top5.some(r => r.id === user?.id);
+        
+        if (!isUserInTop5 && user?.id) {
+            const userRankData = filteredRanking.find(r => r.id === user.id);
+            if (userRankData) {
+                return [...top5, userRankData];
+            }
+        }
+        return top5;
+    }, [filteredRanking, user?.id]);
+
     const rankingTrend = useMemo(() => {
         if (!user || !filteredRanking.length) return null;
         const currentRank = filteredRanking.findIndex(r => r.id === user.id) + 1;
@@ -547,36 +562,51 @@ const DashboardStudent = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredRanking.map((r, i) => (
-                                        <tr key={r.id} style={{
-                                            borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                            background: r.id === user?.id ? 'rgba(255, 232, 31, 0.05)' : 'transparent'
-                                        }}>
-                                            <td style={{ padding: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                {i + 1}º
-                                                {r.posicao_anterior && (
-                                                    <>
-                                                        {(i + 1) < r.posicao_anterior ? (
-                                                            <TrendingUp size={16} color="var(--success)" title={`Subiu ${r.posicao_anterior - (i + 1)} posições`} />
-                                                        ) : (i + 1) > r.posicao_anterior ? (
-                                                            <TrendingDown size={16} color="var(--danger)" title={`Caiu ${(i + 1) - r.posicao_anterior} posições`} />
-                                                        ) : (
-                                                            <Minus size={16} color="var(--text-muted)" opacity={0.3} />
-                                                        )}
-                                                    </>
+                                    {visibleRanking.map((r, i) => {
+                                        const actualRank = filteredRanking.findIndex(fr => fr.id === r.id) + 1;
+                                        const isOutsideTop5 = i === 5 && r.id === user?.id;
+
+                                        return (
+                                            <React.Fragment key={r.id}>
+                                                {isOutsideTop5 && (
+                                                    <tr>
+                                                        <td colSpan="3" style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '1.2rem' }}>
+                                                            ...
+                                                        </td>
+                                                    </tr>
                                                 )}
-                                            </td>
-                                            <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}>
-                                                    {r.foto_url ? <img src={getFullImageUrl(r.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserIcon size={14} style={{ margin: '8px' }} />}
-                                                </div>
-                                                <span style={{ fontWeight: r.id === user?.id ? '900' : 'normal' }}>
-                                                    {r.nome} {r.id === user?.id && '(VOCÊ)'}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>{r.xp}</td>
-                                        </tr>
-                                    ))}
+                                                <tr style={{
+                                                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                                    background: r.id === user?.id ? 'rgba(255, 232, 31, 0.05)' : 'transparent',
+                                                    borderLeft: r.id === user?.id ? '4px solid var(--primary)' : '4px solid transparent'
+                                                }}>
+                                                    <td style={{ padding: '1rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                        {actualRank}º
+                                                        {r.posicao_anterior && (
+                                                            <>
+                                                                {actualRank < r.posicao_anterior ? (
+                                                                    <TrendingUp size={16} color="var(--success)" title={`Subiu ${r.posicao_anterior - actualRank} posições`} />
+                                                                ) : actualRank > r.posicao_anterior ? (
+                                                                    <TrendingDown size={16} color="var(--danger)" title={`Caiu ${actualRank - r.posicao_anterior} posições`} />
+                                                                ) : (
+                                                                    <Minus size={16} color="var(--text-muted)" opacity={0.3} />
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </td>
+                                                    <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}>
+                                                            {r.foto_url ? <img src={getFullImageUrl(r.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserIcon size={14} style={{ margin: '8px' }} />}
+                                                        </div>
+                                                        <span style={{ fontWeight: r.id === user?.id ? '900' : 'normal', color: r.id === user?.id ? 'var(--primary)' : 'inherit' }}>
+                                                            {r.nome} {r.id === user?.id && '(VOCÊ)'}
+                                                        </span>
+                                                    </td>
+                                                    <td style={{ padding: '1rem', fontWeight: 'bold', color: r.id === user?.id ? 'var(--primary)' : 'inherit' }}>{r.xp} XP</td>
+                                                </tr>
+                                            </React.Fragment>
+                                        );
+                                    })}
                                     {filteredRanking.length === 0 && (
                                         <tr><td colSpan="3" style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>Nenhum aventureiro encontrado na sua guilda ainda.</td></tr>
                                     )}
