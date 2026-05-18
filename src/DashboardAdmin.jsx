@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useData } from './DataContext';
-import { Trophy, Users, Star, Plus, Send, LogOut, Award, BookOpen, RefreshCw, Key, Image as ImageIcon, UserCircle, CheckCircle, MessageCircle, Megaphone, Lock, ShieldAlert, Filter, TrendingUp, TrendingDown, Minus, Trash2, Camera, Upload, Target } from 'lucide-react';
+import { Trophy, Users, Star, Plus, Send, LogOut, Award, BookOpen, RefreshCw, Key, Image as ImageIcon, UserCircle, CheckCircle, MessageCircle, Megaphone, Lock, ShieldAlert, Filter, TrendingUp, TrendingDown, Minus, Trash2, Camera, Upload, Target, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const DashboardAdmin = () => {
     const {
@@ -16,6 +17,7 @@ const DashboardAdmin = () => {
     const [showProfileEdit, setShowProfileEdit] = useState(false);
     const [previewUrl, setPreviewUrl] = useState(user?.foto_url || '');
     const [selectedFile, setSelectedFile] = useState(null);
+    const [showQRModal, setShowQRModal] = useState(false);
     const fileInputRef = useRef(null);
 
     // Helper to get full image URL
@@ -351,6 +353,13 @@ const DashboardAdmin = () => {
                             <h2 style={{ letterSpacing: '2px', color: 'var(--warning)' }}>{selectedClass.codigo}</h2>
                         </div>
                         <div style={{ height: '40px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
+                        <button
+                            onClick={() => setShowQRModal(true)}
+                            className="btn"
+                            style={{ background: 'rgba(251, 191, 36, 0.1)', color: 'var(--warning)', padding: '0.5rem 1rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid rgba(251, 191, 36, 0.2)' }}
+                        >
+                            <QrCode size={14} /> EXIBIR QR CODE
+                        </button>
                         <button
                             onClick={handleDeleteTurma}
                             className="btn"
@@ -742,6 +751,32 @@ const DashboardAdmin = () => {
             <footer style={{ marginTop: '3rem', textAlign: 'center', opacity: 0.5, fontSize: '0.8rem' }}>
                 <p>Gerenciador de Ranking - SENAI</p>
             </footer>
+
+            {/* Modal de QR Code */}
+            {showQRModal && selectedClass && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem'
+                }} onClick={() => setShowQRModal(false)}>
+                    <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', maxWidth: '400px', width: '100%', background: 'var(--bg-dark)' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Escanear Código</h2>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Aventureiros podem escanear este QR Code para entrar automaticamente na guilda.</p>
+                        
+                        <div style={{ background: 'white', padding: '1.5rem', borderRadius: '16px', display: 'inline-block', marginBottom: '2rem' }}>
+                            <QRCodeSVG value={selectedClass.codigo} size={220} bgColor={"#ffffff"} fgColor={"#000000"} />
+                        </div>
+                        
+                        <h1 style={{ letterSpacing: '4px', color: 'var(--warning)', fontSize: '2.5rem', marginBottom: '2rem' }}>
+                            {selectedClass.codigo}
+                        </h1>
+
+                        <button onClick={() => setShowQRModal(false)} className="btn btn-primary" style={{ width: '100%', padding: '1rem' }}>
+                            FECHAR
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

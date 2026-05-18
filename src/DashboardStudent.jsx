@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from './DataContext';
 import { Trophy, Star, MessageSquare, User as UserIcon, LogOut, Award, RefreshCw, Quote, Info, Settings, Camera, Save, BookOpen, CheckCircle, Bell, Lock, Upload, Image as ImageIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 const DashboardStudent = () => {
     const {
@@ -25,6 +26,7 @@ const DashboardStudent = () => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [joinCode, setJoinCode] = useState('');
+    const [showQRScanner, setShowQRScanner] = useState(false);
     const fileInputRef = useRef(null);
 
     // Helper to get full image URL
@@ -263,15 +265,19 @@ const DashboardStudent = () => {
                 <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', marginBottom: '3rem', background: 'rgba(255, 232, 31, 0.05)', border: '2px dashed var(--primary)' }}>
                     <h3 style={{ fontSize: '1.8rem', color: 'var(--primary)', marginBottom: '1rem' }}>Sua Jornada Começa Aqui</h3>
                     <p style={{ marginBottom: '2rem', opacity: 0.8 }}>Você ainda não pertence a nenhuma Guilda (Turma). Peça o Código de Acesso ao seu Professor para começar a ganhar XP e subir no Ranking!</p>
-                    <form onSubmit={handleJoinClass} style={{ display: 'flex', gap: '1rem', maxWidth: '400px', margin: '0 auto' }}>
+                    <form onSubmit={handleJoinClass} style={{ display: 'flex', gap: '0.5rem', maxWidth: '400px', margin: '0 auto' }}>
                         <input
                             className="input-field"
                             placeholder="CÓDIGO DA GUILDA"
                             value={joinCode}
                             onChange={e => setJoinCode(e.target.value.toUpperCase())}
                             required
+                            style={{ marginBottom: 0 }}
                         />
-                        <button type="submit" className="btn btn-primary" style={{ padding: '0 2rem' }}>ENTRAR</button>
+                        <button type="button" onClick={() => setShowQRScanner(true)} className="btn" style={{ background: 'rgba(255,255,255,0.1)', padding: '0 1rem' }}>
+                            <Camera size={18} />
+                        </button>
+                        <button type="submit" className="btn btn-primary" style={{ padding: '0 1.5rem' }}>ENTRAR</button>
                     </form>
                 </div>
             )}
@@ -584,6 +590,36 @@ const DashboardStudent = () => {
             <footer style={{ marginTop: '3rem', textAlign: 'center', opacity: 0.5, fontSize: '0.8rem' }}>
                 <p>Desenvolvido pelo Professor Johnny Oliveira</p>
             </footer>
+
+            {/* Modal do Scanner */}
+            {showQRScanner && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(5px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem'
+                }} onClick={() => setShowQRScanner(false)}>
+                    <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', maxWidth: '400px', width: '100%', background: 'var(--bg-dark)' }} onClick={e => e.stopPropagation()}>
+                        <h2 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Escanear Código</h2>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Aponte a câmera para o QR Code da sala.</p>
+                        
+                        <div style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem', border: '2px solid var(--primary)' }}>
+                            <Scanner 
+                                onScan={(result) => {
+                                    if (result && result.length > 0) {
+                                        setJoinCode(result[0].rawValue.toUpperCase());
+                                        setShowQRScanner(false);
+                                    }
+                                }}
+                                onError={(error) => console.log(error)}
+                            />
+                        </div>
+
+                        <button type="button" onClick={() => setShowQRScanner(false)} className="btn" style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.1)' }}>
+                            CANCELAR
+                        </button>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

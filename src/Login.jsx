@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from './DataContext';
-import { LogIn, UserPlus, Mail, Lock, User, Code, ArrowLeft, Shield } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User, Code, ArrowLeft, Shield, Camera } from 'lucide-react';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 const Login = () => {
     const { login, registerStudent, updateProfessorPassword } = useData();
@@ -15,6 +16,7 @@ const Login = () => {
 
     const [newPassword, setNewPassword] = useState('');
     const [mustChange, setMustChange] = useState(false);
+    const [showQRScanner, setShowQRScanner] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -49,6 +51,7 @@ const Login = () => {
     };
 
     return (
+        <>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '1rem', background: 'var(--bg-dark)' }}>
             <div className="glass-card" style={{ padding: '2.5rem', width: '100%', maxWidth: '450px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -144,13 +147,24 @@ const Login = () => {
                             {mode === 'REGISTER' && (
                                 <div>
                                     <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem', fontSize: '0.85rem' }}><Code size={14} /> Código da Turma</label>
-                                    <input
-                                        className="input-field"
-                                        placeholder="Código fornecido pelo professor"
-                                        value={formData.codigo}
-                                        onChange={e => setFormData({ ...formData, codigo: e.target.value.toUpperCase() })}
-                                        required
-                                    />
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <input
+                                            className="input-field"
+                                            placeholder="Código fornecido pelo professor"
+                                            value={formData.codigo}
+                                            onChange={e => setFormData({ ...formData, codigo: e.target.value.toUpperCase() })}
+                                            required
+                                            style={{ marginBottom: 0, flex: 1 }}
+                                        />
+                                        <button 
+                                            type="button" 
+                                            onClick={() => setShowQRScanner(true)}
+                                            className="btn" 
+                                            style={{ background: 'rgba(255,255,255,0.1)', padding: '0 1rem' }}
+                                        >
+                                            <Camera size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
@@ -183,6 +197,37 @@ const Login = () => {
                 </div>
             </div>
         </div>
+
+        {/* Modal do Scanner */}
+        {showQRScanner && (
+            <div style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(5px)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem'
+            }} onClick={() => setShowQRScanner(false)}>
+                <div className="glass-card" style={{ padding: '2rem', textAlign: 'center', maxWidth: '400px', width: '100%', background: 'var(--bg-dark)' }} onClick={e => e.stopPropagation()}>
+                    <h2 style={{ color: 'var(--primary)', marginBottom: '1rem' }}>Escanear Código</h2>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>Aponte a câmera para o QR Code da sala.</p>
+                    
+                    <div style={{ borderRadius: '12px', overflow: 'hidden', marginBottom: '2rem', border: '2px solid var(--primary)' }}>
+                        <Scanner 
+                            onScan={(result) => {
+                                if (result && result.length > 0) {
+                                    setFormData({ ...formData, codigo: result[0].rawValue.toUpperCase() });
+                                    setShowQRScanner(false);
+                                }
+                            }}
+                            onError={(error) => console.log(error)}
+                        />
+                    </div>
+
+                    <button type="button" onClick={() => setShowQRScanner(false)} className="btn" style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.1)' }}>
+                        CANCELAR
+                    </button>
+                </div>
+            </div>
+        )}
+        </>
     );
 };
 
