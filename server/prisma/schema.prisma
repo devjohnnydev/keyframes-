@@ -60,6 +60,7 @@ model Aluno {
   // Perfil do Aluno
   foto_url     String?   @db.Text
   info         String?   @db.Text
+  estado_humor String?
   
   professor    Professor? @relation(fields: [professorId], references: [id], onDelete: Cascade)
   professorId  Int?

@@ -444,6 +444,7 @@ const DashboardAdmin = () => {
                                                     <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}>
                                                         {r.foto_url ? <img src={getFullImageUrl(r.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={14} style={{ margin: '8px' }} />}
                                                     </div>
+                                                    {r.estado_humor && <span style={{ marginRight: '6px' }} title="Humor do dia">{r.estado_humor}</span>}
                                                     {r.nome}
                                                 </td>
                                                 <td style={{ padding: '1rem', color: 'var(--primary)' }}>{r.turmaNome}</td>
@@ -478,6 +479,7 @@ const DashboardAdmin = () => {
                                                 <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}>
                                                     {s.foto_url ? <img src={getFullImageUrl(s.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={14} style={{ margin: '8px' }} />}
                                                 </div>
+                                                {s.estado_humor && <span style={{ marginRight: '6px' }} title="Humor do dia">{s.estado_humor}</span>}
                                                 {s.nome}
                                             </td>
                                             <td style={{ padding: '1rem', opacity: 0.8 }}>{s.email || '—'}</td>

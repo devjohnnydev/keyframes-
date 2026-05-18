@@ -3,6 +3,17 @@ import { useData } from './DataContext';
 import { Trophy, Star, MessageSquare, User as UserIcon, LogOut, Award, RefreshCw, Quote, Info, Settings, Camera, Save, BookOpen, CheckCircle, Bell, Lock, Upload, Image as ImageIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 
+const moods = [
+    { emoji: '😀', label: 'Feliz' },
+    { emoji: '🔥', label: 'Focado' },
+    { emoji: '🤔', label: 'Pensativo' },
+    { emoji: '😴', label: 'Com sono' },
+    { emoji: '😢', label: 'Triste' },
+    { emoji: '😟', label: 'Preocupado' },
+    { emoji: '🤮', label: 'Doente' },
+    { emoji: '❤️', label: 'Motivado' }
+];
+
 const DashboardStudent = () => {
     const {
     user, logout, ranking, loading, refreshAll, updateStudentProfile, updateStudentPassword, uploadFile, activities, grades, messages, joinClass, markMessageAsRead, missions, sendEmojiReaction
@@ -27,6 +38,7 @@ const DashboardStudent = () => {
     const [previewUrl, setPreviewUrl] = useState('');
     const [joinCode, setJoinCode] = useState('');
     const [showQRScanner, setShowQRScanner] = useState(false);
+    const [showMoodSelector, setShowMoodSelector] = useState(false);
     const fileInputRef = useRef(null);
 
     // Helper to get full image URL
@@ -171,6 +183,70 @@ const DashboardStudent = () => {
                         </h2>
                         <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Aventureiro: {user?.nome}</p>
                         <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Mestre: {myStats.professorNome || professor?.nome || 'Carregando...'}</p>
+                        
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.4rem' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Como você está hoje?</span>
+                            <button 
+                                onClick={() => setShowMoodSelector(!showMoodSelector)} 
+                                style={{ 
+                                    background: 'rgba(255,255,255,0.05)', 
+                                    border: '1px solid rgba(255,255,255,0.1)', 
+                                    borderRadius: '20px', 
+                                    padding: '2px 8px', 
+                                    color: 'white', 
+                                    fontSize: '0.8rem', 
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '4px'
+                                }}
+                            >
+                                {user?.estado_humor || '❓'} {showMoodSelector ? '▲' : '▼'}
+                            </button>
+                        </div>
+                        
+                        {showMoodSelector && (
+                            <div style={{ 
+                                display: 'flex', 
+                                gap: '0.3rem', 
+                                marginTop: '0.5rem', 
+                                flexWrap: 'wrap', 
+                                background: 'rgba(0,0,0,0.3)', 
+                                padding: '8px', 
+                                borderRadius: '8px',
+                                border: '1px solid rgba(255,255,255,0.05)'
+                            }}>
+                                {moods.map(m => (
+                                    <button 
+                                        key={m.emoji}
+                                        type="button"
+                                        onClick={async () => {
+                                            try {
+                                                await updateStudentProfile({ estado_humor: m.emoji });
+                                                setShowMoodSelector(false);
+                                                refreshAll();
+                                            } catch (err) {
+                                                alert("Falha ao atualizar humor: " + err.message);
+                                            }
+                                        }}
+                                        title={m.label}
+                                        style={{ 
+                                            background: 'none', 
+                                            border: 'none', 
+                                            fontSize: '1.2rem', 
+                                            cursor: 'pointer',
+                                            padding: '4px',
+                                            borderRadius: '4px',
+                                            transition: 'transform 0.1s'
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.3)'}
+                                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                    >
+                                        {m.emoji}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -599,6 +675,7 @@ const DashboardStudent = () => {
                                                             {r.foto_url ? <img src={getFullImageUrl(r.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserIcon size={14} style={{ margin: '8px' }} />}
                                                         </div>
                                                         <span style={{ fontWeight: r.id === user?.id ? '900' : 'normal', color: r.id === user?.id ? 'var(--primary)' : 'inherit' }}>
+                                                            {r.estado_humor && <span style={{ marginRight: '6px' }} title="Humor do dia">{r.estado_humor}</span>}
                                                             {r.nome} {r.id === user?.id && '(VOCÊ)'}
                                                         </span>
                                                     </td>

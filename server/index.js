@@ -798,7 +798,8 @@ app.get('/api/ranking', asyncHandler(async (req, res) => {
             turmaNome: a.turma?.nome || 'Nenhuma',
             professorId: a.professorId,
             turmaId: a.turmaId,
-            posicao_anterior: a.posicao_anterior
+            posicao_anterior: a.posicao_anterior,
+            estado_humor: a.estado_humor
         };
     }).sort((a, b) => b.xp - a.xp);
 
@@ -806,10 +807,10 @@ app.get('/api/ranking', asyncHandler(async (req, res) => {
 }));
 
 app.patch('/api/aluno/perfil', authenticate, authorize(['ALUNO']), asyncHandler(async (req, res) => {
-    const { foto_url, info, nome } = req.body;
+    const { foto_url, info, nome, estado_humor } = req.body;
     const updated = await prisma.aluno.update({
         where: { id: req.user.id },
-        data: { foto_url, info, nome }
+        data: { foto_url, info, nome, estado_humor }
     });
     res.json(updated);
 }));
