@@ -108,6 +108,7 @@ model Nota {
   id             Int      @id @default(autoincrement())
   valor          Float
   reacao_emoji   String?  // Reação do aluno à atividade (ex: "😊", "😕", "🔥")
+  data_avaliacao DateTime @default(now())
   
   aluno       Aluno    @relation(fields: [alunoId], references: [id], onDelete: Cascade)
   alunoId     Int

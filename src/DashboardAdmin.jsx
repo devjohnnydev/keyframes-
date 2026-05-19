@@ -720,7 +720,7 @@ const DashboardAdmin = () => {
                                     <button
                                         key={a.id}
                                         onClick={() => setSelectedActivity(a)}
-                                        className={`btn ${selectedActivity?.id === a.id ? 'btn-active' : 'glass-card'}`}
+                                        className={`btn btn-activity-select ${selectedActivity?.id === a.id ? 'active' : ''}`}
                                         style={{ whiteSpace: 'nowrap' }}
                                     >
                                         {a.titulo}
@@ -743,15 +743,20 @@ const DashboardAdmin = () => {
                                         <tbody>
                                             {filteredStudents.map(s => {
                                                 const grade = selectedActivity.notas?.find(g => g.alunoId === s.id);
+                                                const hasGrade = grade || editGrades[`${s.id}-${selectedActivity.id}`];
+                                                
                                                 return (
                                                     <tr key={s.id} style={{
                                                         borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                                        background: grade
-                                                            ? 'rgba(34, 197, 94, 0.07)'
-                                                            : 'rgba(239, 68, 68, 0.05)',
-                                                        transition: 'background 0.3s'
+                                                        background: hasGrade
+                                                            ? 'rgba(34, 197, 94, 0.12)'
+                                                            : 'rgba(239, 68, 68, 0.03)',
+                                                        borderLeft: hasGrade
+                                                            ? '4px solid #22c55e'
+                                                            : '4px solid #ef4444',
+                                                        transition: 'all 0.3s ease'
                                                     }}>
-                                                        <td style={{ padding: '1rem', fontWeight: grade ? '600' : 'normal', color: grade ? 'white' : 'var(--text-muted)' }}>{s.nome}</td>
+                                                        <td style={{ padding: '1rem', fontWeight: hasGrade ? '600' : 'normal', color: hasGrade ? 'white' : 'var(--text-muted)' }}>{s.nome}</td>
                                                         <td style={{ padding: '1rem', fontWeight: 'bold' }}>
                                                             {grade ? (
                                                                 <span style={{ background: 'rgba(34,197,94,0.2)', color: '#4ade80', padding: '0.3rem 0.8rem', borderRadius: '8px', border: '1px solid rgba(34,197,94,0.4)' }}>
@@ -769,14 +774,33 @@ const DashboardAdmin = () => {
                                                                 type="number"
                                                                 step="0.1"
                                                                 placeholder="0.0"
-                                                                style={{ width: '80px', padding: '0.4rem' }}
-                                                                value={editGrades[`${s.id}-${selectedActivity.id}`] || ''}
+                                                                style={{ 
+                                                                    width: '80px', 
+                                                                    padding: '0.4rem',
+                                                                    background: hasGrade ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                                                                    border: hasGrade ? '1px solid #22c55e' : '1px solid rgba(255, 255, 255, 0.1)',
+                                                                    color: hasGrade ? '#4ade80' : 'white',
+                                                                    fontWeight: 'bold',
+                                                                    transition: 'all 0.3s ease'
+                                                                }}
+                                                                value={editGrades[`${s.id}-${selectedActivity.id}`] || (grade ? grade.valor : '')}
                                                                 onChange={e => setEditGrades({ ...editGrades, [`${s.id}-${selectedActivity.id}`]: e.target.value })}
                                                                 onBlur={() => handleSetGrade(s.id, selectedActivity.id)}
                                                             />
                                                         </td>
                                                         <td style={{ padding: '1rem' }}>
-                                                            <button onClick={() => handleSetGrade(s.id, selectedActivity.id)} className="btn btn-secondary" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}>SALVAR</button>
+                                                            <button 
+                                                                onClick={() => handleSetGrade(s.id, selectedActivity.id)} 
+                                                                className="btn btn-secondary-outline" 
+                                                                style={{ 
+                                                                    padding: '0.4rem 1rem', 
+                                                                    fontSize: '0.8rem',
+                                                                    border: hasGrade ? '1px solid #22c55e' : '1px solid rgba(255,255,255,0.2)', 
+                                                                    color: hasGrade ? '#4ade80' : 'white'
+                                                                }}
+                                                            >
+                                                                SALVAR
+                                                            </button>
                                                         </td>
                                                     </tr>
                                                 );

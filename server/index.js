@@ -420,7 +420,23 @@ app.get('/api/minhas-notas', authenticate, authorize(['ALUNO']), asyncHandler(as
         where: { alunoId: req.user.id },
         include: { atividade: true }
     });
-    res.json(notas);
+    
+    // Ocultar notas avaliadas hoje se ainda não passou das 17:30 (Pregão)
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const isAfterPregão = currentHour > 17 || (currentHour === 17 && currentMinute >= 30);
+    
+    const visibleNotas = notas.filter(n => {
+        if (!n.data_avaliacao) return true;
+        const evalDate = new Date(n.data_avaliacao);
+        if (evalDate.toDateString() === now.toDateString() && !isAfterPregão) {
+            return false;
+        }
+        return true;
+    });
+    
+    res.json(visibleNotas);
 }));
 
 app.get('/api/mensagens', authenticate, asyncHandler(async (req, res) => {
@@ -738,6 +754,28 @@ app.get('/api/missoes', authenticate, asyncHandler(async (req, res) => {
         include,
         orderBy: { data_criacao: 'desc' }
     });
+
+    // Ocultar notas de missões avaliadas hoje para alunos antes de 17:30
+    if (req.user.role === 'ALUNO') {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const isAfterPregão = currentHour > 17 || (currentHour === 17 && currentMinute >= 30);
+        
+        missoes.forEach(m => {
+            if (m.notas) {
+                m.notas = m.notas.filter(n => {
+                    if (!n.data_avaliacao) return true;
+                    const evalDate = new Date(n.data_avaliacao);
+                    if (evalDate.toDateString() === now.toDateString() && !isAfterPregão) {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        });
+    }
+
     res.json(missoes);
 }));
 
@@ -781,10 +819,49 @@ app.get('/api/ranking', asyncHandler(async (req, res) => {
         }
     });
 
+    // Determinar se a requisição veio de um aluno
+    let isStudentView = true;
+    const authHeader = req.headers.authorization;
+    if (authHeader) {
+        try {
+            const token = authHeader.split(' ')[1];
+            const decoded = jwt.verify(token, JWT_SECRET);
+            if (decoded.role === 'PROFESSOR' || decoded.role === 'ADMIN') {
+                isStudentView = false;
+            }
+        } catch (e) {}
+    }
+
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const isAfterPregão = currentHour > 17 || (currentHour === 17 && currentMinute >= 30);
+
     const ranking = alunos.map(a => {
-        const xpAtividades = a.notas.reduce((acc, n) => acc + (n.valor * 10), 0);
-        // XP Missões = Nota * 3 (Peso 3x)
-        const xpMissoes = a.notas_missoes.reduce((acc, n) => acc + (n.valor * 3), 0);
+        // Filtrar notas de atividades se for visão de Aluno e antes das 17:30
+        const visibleNotas = a.notas.filter(n => {
+            if (!isStudentView) return true;
+            if (!n.data_avaliacao) return true;
+            const evalDate = new Date(n.data_avaliacao);
+            if (evalDate.toDateString() === now.toDateString() && !isAfterPregão) {
+                return false;
+            }
+            return true;
+        });
+
+        // Filtrar notas de missões
+        const visibleNotasMissoes = a.notas_missoes.filter(n => {
+            if (!isStudentView) return true;
+            if (!n.data_avaliacao) return true;
+            const evalDate = new Date(n.data_avaliacao);
+            if (evalDate.toDateString() === now.toDateString() && !isAfterPregão) {
+                return false;
+            }
+            return true;
+        });
+
+        const xpAtividades = visibleNotas.reduce((acc, n) => acc + (n.valor * 10), 0);
+        const xpMissoes = visibleNotasMissoes.reduce((acc, n) => acc + (n.valor * 3), 0);
         const totalXP = xpAtividades + xpMissoes;
 
         return {
