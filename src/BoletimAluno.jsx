@@ -67,6 +67,15 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
     if (!data) return null;
     const { aluno, turma, professor, stats, atividades, missoes } = data;
 
+    const getFullImageUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('http') || url.startsWith('data:')) return url;
+        const baseUrl = window.location.origin.includes('localhost:5173') || window.location.origin.includes('localhost:5000')
+            ? 'http://localhost:3001'
+            : window.location.origin;
+        return `${baseUrl}${url}`;
+    };
+
     const getMediaGeral = () => {
         const gradedAtividades = atividades.filter(a => a.nota !== null);
         const gradedMissoes = missoes.filter(m => m.nota !== null);
@@ -109,49 +118,56 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                             Gerado em {fmtDate(data.gerado_em)} · Documento Oficial
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }} className="no-print">
-                        <button 
-                            onClick={handlePrint} 
-                            className="btn btn-primary" 
-                            style={{ 
-                                padding: '0.6rem 1.4rem', 
-                                fontSize: '0.85rem', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                gap: '0.5rem', 
-                                background: '#ffe81f', 
-                                color: '#0a0a0f', 
-                                fontWeight: '900', 
-                                border: 'none', 
-                                borderRadius: '10px', 
-                                cursor: 'pointer',
-                                transition: 'all 0.2s',
-                                boxShadow: '0 0 15px rgba(255, 232, 31, 0.4)'
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 232, 31, 0.6)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 232, 31, 0.4)'; }}
-                        >
-                            <Printer size={16} /> IMPRIMIR
-                        </button>
+                    <div style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
                         <button 
                             onClick={onClose} 
+                            className="no-print"
                             style={{ 
                                 background: '#ef4444', 
-                                border: '1px solid #dc2626', 
-                                borderRadius: '10px', 
-                                padding: '0.6rem', 
-                                cursor: 'pointer', 
-                                color: '#fff',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
+                                color: '#fff', 
+                                border: 'none', 
+                                borderRadius: '8px', 
+                                padding: '0.6rem 1.2rem', 
+                                fontWeight: 'bold', 
+                                cursor: 'pointer',
                                 transition: 'all 0.2s',
-                                boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)'
+                                boxShadow: '0 2px 8px rgba(239, 68, 68, 0.4)'
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.boxShadow = '0 0 25px rgba(239, 68, 68, 0.6)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.4)'; }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#dc2626';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#ef4444';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
                         >
-                            <X size={18} strokeWidth={3} />
+                            Fechar
+                        </button>
+                        <button 
+                            onClick={handlePrint} 
+                            className="no-print"
+                            style={{ 
+                                background: '#10b981', 
+                                color: '#fff', 
+                                border: 'none', 
+                                borderRadius: '8px', 
+                                padding: '0.6rem 1.2rem', 
+                                fontWeight: 'bold', 
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = '#059669';
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = '#10b981';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
+                        >
+                            Imprimir
                         </button>
                     </div>
                 </div>
@@ -163,7 +179,7 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
                             <div style={{ width: 64, height: 64, borderRadius: '50%', overflow: 'hidden', border: '3px solid #ffe81f', background: 'rgba(255,255,255,0.05)', flexShrink: 0 }}>
                                 {aluno.foto_url
-                                    ? <img src={aluno.foto_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={aluno.nome} />
+                                    ? <img src={getFullImageUrl(aluno.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={aluno.nome} />
                                     : <User size={32} style={{ margin: 16, color: '#aaa' }} />}
                             </div>
                             <div>
@@ -206,7 +222,7 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                     <div style={{ ...sectionStyle, display: 'flex', alignItems: 'center', gap: '1.2rem', marginBottom: '1.5rem' }}>
                         <div style={{ width: 50, height: 50, borderRadius: '50%', overflow: 'hidden', border: '2px solid #6366f1', flexShrink: 0, background: 'rgba(255,255,255,0.05)' }}>
                             {professor.foto_url
-                                ? <img src={professor.foto_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={professor.nome} />
+                                ? <img src={getFullImageUrl(professor.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={professor.nome} />
                                 : <User size={24} style={{ margin: 13, color: '#aaa' }} />}
                         </div>
                         <div style={{ flex: 1 }}>

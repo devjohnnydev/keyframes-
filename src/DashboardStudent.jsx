@@ -79,7 +79,7 @@ const DashboardStudent = () => {
     // Helper to get full image URL
     const getFullImageUrl = (url) => {
         if (!url) return null;
-        if (url.startsWith('http')) return url;
+        if (url.startsWith('http') || url.startsWith('data:')) return url;
         // Assume relative URLs are served from the backend
         const baseUrl = window.location.origin.includes('localhost:5173')
             ? 'http://localhost:3001'
