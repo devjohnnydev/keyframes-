@@ -368,23 +368,34 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                         display: none !important;
                     }
 
+                    /* Reset the fixed overlay container to regular block flow so it can stretch multi-page */
+                    .boletim-overlay {
+                        position: static !important;
+                        inset: auto !important;
+                        width: 100% !important;
+                        height: auto !important;
+                        overflow: visible !important;
+                        background: transparent !important;
+                        padding: 0 !important;
+                        display: block !important;
+                    }
+
                     /* Hide everything else under body */
                     body * {
                         visibility: hidden !important;
                     }
                     /* Render overlay container and bulletin card visible */
-                    #boletim-print-area, #boletim-print-area * {
+                    .boletim-overlay, #boletim-print-area, #boletim-print-area * {
                         visibility: visible !important;
                     }
-                    /* Place the bulletin card perfectly at the top left of the printing page */
+                    /* Place the bulletin card perfectly flowing on the printing pages */
                     #boletim-print-area {
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
+                        position: static !important;
                         width: 100% !important;
                         max-width: none !important;
                         height: auto !important;
                         max-height: none !important;
+                        overflow: visible !important;
                         margin: 0 !important;
                         padding: 0.5cm !important;
                         background: #ffffff !important;
