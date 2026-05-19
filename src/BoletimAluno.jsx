@@ -310,7 +310,7 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                                     <tr key={m.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: m.nota ? 'rgba(96,165,250,0.07)' : 'transparent' }}>
                                         <td style={{ padding: '0.7rem 0.8rem', color: '#fff', fontWeight: m.nota ? '600' : 'normal' }}>
                                             <div>{m.titulo}</div>
-                                            {m.descricao && <div style={{ fontSize: '0.7rem', color: '#aaa', marginTop: 2 }}>{m.descricao}</div>}
+                                            {m.descricao && <div className="no-print" style={{ fontSize: '0.7rem', color: '#aaa', marginTop: 2 }}>{m.descricao}</div>}
                                         </td>
                                         <td style={{ padding: '0.7rem 0.8rem', color: '#aaa', fontSize: '0.75rem' }}>{fmtDate(m.prazo)}</td>
                                         <td style={{ padding: '0.7rem 0.8rem', textAlign: 'center', color: '#f59e0b' }}>{m.recompensa} pts</td>
@@ -381,14 +381,98 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                         height: auto !important;
                         max-height: none !important;
                         margin: 0 !important;
-                        padding: 1.5rem !important;
+                        padding: 0.5cm !important;
+                        background: #ffffff !important;
+                        color: #000000 !important;
                         box-shadow: none !important;
                         border: none !important;
-                        background: #0a0a0f !important;
-                        color: #fff !important;
                     }
+
+                    /* General element colors for high contrast black-on-white print */
+                    #boletim-print-area h1,
+                    #boletim-print-area h2,
+                    #boletim-print-area h3,
+                    #boletim-print-area p,
+                    #boletim-print-area div,
+                    #boletim-print-area span,
+                    #boletim-print-area td,
+                    #boletim-print-area th,
+                    #boletim-print-area strong {
+                        color: #000000 !important;
+                        text-shadow: none !important;
+                        background: transparent !important;
+                    }
+
+                    #boletim-print-area svg {
+                        stroke: #000000 !important;
+                        fill: none !important;
+                    }
+
+                    #boletim-print-area svg path,
+                    #boletim-print-area svg circle,
+                    #boletim-print-area svg line,
+                    #boletim-print-area svg polyline,
+                    #boletim-print-area svg rect,
+                    #boletim-print-area svg polygon {
+                        stroke: #000000 !important;
+                    }
+
+                    /* Style card sections with simple elegant borders and zero heavy black ink backgrounds */
+                    #boletim-print-area div[style*="background"],
+                    #boletim-print-area .sectionStyle {
+                        background: #ffffff !important;
+                        border: 1px solid #cccccc !important;
+                        border-radius: 10px !important;
+                        padding: 0.8rem !important;
+                        margin-bottom: 0.8rem !important;
+                    }
+
+                    /* Tables styling in print to look like standard sulfite academic reports */
+                    #boletim-print-area table {
+                        border-collapse: collapse !important;
+                        width: 100% !important;
+                    }
+                    #boletim-print-area tr {
+                        background: transparent !important;
+                        border-bottom: 1px solid #dddddd !important;
+                    }
+                    #boletim-print-area th {
+                        color: #000000 !important;
+                        border-bottom: 2px solid #000000 !important;
+                        padding: 0.4rem 0.6rem !important;
+                        font-size: 0.75rem !important;
+                        font-weight: bold !important;
+                    }
+                    #boletim-print-area td {
+                        color: #111111 !important;
+                        padding: 0.4rem 0.6rem !important;
+                        font-size: 0.75rem !important;
+                        border-bottom: 1px solid #eeeeee !important;
+                    }
+
+                    /* Convert active status tags to clean text tags */
+                    #boletim-print-area span[style*="background"] {
+                        background: #f3f4f6 !important;
+                        color: #000000 !important;
+                        border: 1px solid #bbbbbb !important;
+                        padding: 1px 8px !important;
+                        border-radius: 4px !important;
+                    }
+
+                    /* Clean grid gaps for compact height */
+                    #boletim-print-area div[style*="gridTemplateColumns"] {
+                        gap: 0.6rem !important;
+                        margin-bottom: 0.6rem !important;
+                    }
+
+                    /* Hide elements explicitly marked as no-print */
                     .no-print {
                         display: none !important;
+                    }
+
+                    @page {
+                        size: A4 portrait;
+                        margin: 1.2cm 1cm;
                     }
                 }
             `}</style>
