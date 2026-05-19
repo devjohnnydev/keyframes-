@@ -96,7 +96,7 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
     const mediaGeral = getMediaGeral();
 
     return (
-        <div style={overlayStyle} onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="boletim-overlay" style={overlayStyle} onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div style={cardStyle} id="boletim-print-area">
                 {/* ── HEADER ── */}
                 <div style={headerStyle}>
@@ -363,6 +363,11 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
 
             <style>{`
                 @media print {
+                    /* Hide the dashboard content entirely behind the modal during print */
+                    .container > *:not(.boletim-overlay) {
+                        display: none !important;
+                    }
+
                     /* Hide everything else under body */
                     body * {
                         visibility: hidden !important;
