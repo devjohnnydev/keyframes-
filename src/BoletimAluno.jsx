@@ -363,14 +363,33 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
 
             <style>{`
                 @media print {
-                    body > *:not(#boletim-print-area) { display: none !important; }
-                    #boletim-print-area {
-                        position: fixed !important; top: 0 !important; left: 0 !important;
-                        width: 100vw !important; max-width: none !important; max-height: none !important;
-                        overflow: visible !important; background: #0a0a0f !important;
-                        box-shadow: none !important; border-radius: 0 !important;
+                    /* Hide everything else under body */
+                    body * {
+                        visibility: hidden !important;
                     }
-                    .no-print { display: none !important; }
+                    /* Render overlay container and bulletin card visible */
+                    #boletim-print-area, #boletim-print-area * {
+                        visibility: visible !important;
+                    }
+                    /* Place the bulletin card perfectly at the top left of the printing page */
+                    #boletim-print-area {
+                        position: absolute !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 100% !important;
+                        max-width: none !important;
+                        height: auto !important;
+                        max-height: none !important;
+                        margin: 0 !important;
+                        padding: 1.5rem !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        background: #0a0a0f !important;
+                        color: #fff !important;
+                    }
+                    .no-print {
+                        display: none !important;
+                    }
                 }
             `}</style>
         </div>
