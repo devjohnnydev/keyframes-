@@ -67,6 +67,34 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
     if (!data) return null;
     const { aluno, turma, professor, stats, atividades, missoes } = data;
 
+    const getMediaGeral = () => {
+        const gradedAtividades = atividades.filter(a => a.nota !== null);
+        const gradedMissoes = missoes.filter(m => m.nota !== null);
+        
+        const totalItems = gradedAtividades.length + gradedMissoes.length;
+        if (totalItems === 0) return '—';
+        
+        const sumAtividades = gradedAtividades.reduce((acc, a) => {
+            const max = a.nota_maxima || 10;
+            return acc + ((a.nota.valor / max) * 10);
+        }, 0);
+        
+        const sumMissoes = gradedMissoes.reduce((acc, m) => acc + m.nota.valor, 0);
+        
+        const media = (sumAtividades + sumMissoes) / totalItems;
+        return media.toFixed(1);
+    };
+
+    const getMediaColor = (mediaVal) => {
+        if (mediaVal === '—') return '#aaa';
+        const num = parseFloat(mediaVal);
+        if (num >= 8.0) return '#4ade80';
+        if (num >= 6.0) return '#facc15';
+        return '#f87171';
+    };
+
+    const mediaGeral = getMediaGeral();
+
     return (
         <div style={overlayStyle} onClick={(e) => e.target === e.currentTarget && onClose()}>
             <div style={cardStyle} id="boletim-print-area">
@@ -121,8 +149,12 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.8rem' }}>
                             <StatBlock icon={<Trophy size={20} color="#ffe81f" />} label="XP Total" value={`${fmtXP(stats.totalXP)} XP`} color="#ffe81f" />
                             <StatBlock icon={<Award size={20} color="#a78bfa" />} label="Nível" value={`LVL ${stats.nivel}`} color="#a78bfa" />
-                            <StatBlock icon={<TrendingUp size={20} color="#4ade80" />} label="Rank na Guilda" value={stats.rankPosition > 0 ? `${stats.rankPosition}º / ${stats.totalStudents}` : '—'} color="#4ade80" />
+                            <StatBlock icon={<TrendingUp size={20} color="#4ade80" />} label="Rank na Guilda" value={stats.rankPosition > 0 ? (stats.rankPosition <= 5 ? `${stats.rankPosition}º / ${stats.totalStudents}` : '—') : '—'} color="#4ade80" />
                             <StatBlock icon={<Star size={20} color="#f59e0b" />} label="Portal Diário" value={`${stats.xpPortal} pts`} color="#f59e0b" />
+                            
+                            <div style={{ gridColumn: 'span 2' }}>
+                                <StatBlock icon={<BookOpen size={20} color={getMediaColor(mediaGeral)} />} label="Média Geral (Tarefas + Missões)" value={mediaGeral !== '—' ? `${mediaGeral} / 10` : '—'} color={getMediaColor(mediaGeral)} />
+                            </div>
                         </div>
                         <div style={{ marginTop: '1rem', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', display: 'flex', justifyContent: 'space-between' }}>
                             <span>XP Atividades: <strong style={{ color: '#4ade80' }}>{fmtXP(stats.xpAtividades)}</strong></span>
