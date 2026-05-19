@@ -109,12 +109,49 @@ const BoletimAluno = ({ alunoId, token, onClose }) => {
                             Gerado em {fmtDate(data.gerado_em)} · Documento Oficial
                         </p>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.5rem' }} className="no-print">
-                        <button onClick={handlePrint} className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                            <Printer size={16} /> Imprimir
+                    <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }} className="no-print">
+                        <button 
+                            onClick={handlePrint} 
+                            className="btn btn-primary" 
+                            style={{ 
+                                padding: '0.6rem 1.4rem', 
+                                fontSize: '0.85rem', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '0.5rem', 
+                                background: '#ffe81f', 
+                                color: '#0a0a0f', 
+                                fontWeight: '900', 
+                                border: 'none', 
+                                borderRadius: '10px', 
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 0 15px rgba(255, 232, 31, 0.4)'
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 232, 31, 0.6)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 232, 31, 0.4)'; }}
+                        >
+                            <Printer size={16} /> IMPRIMIR
                         </button>
-                        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '0.6rem', cursor: 'pointer', color: '#fff' }}>
-                            <X size={18} />
+                        <button 
+                            onClick={onClose} 
+                            style={{ 
+                                background: '#ef4444', 
+                                border: '1px solid #dc2626', 
+                                borderRadius: '10px', 
+                                padding: '0.6rem', 
+                                cursor: 'pointer', 
+                                color: '#fff',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                                boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)'
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.08)'; e.currentTarget.style.background = '#dc2626'; e.currentTarget.style.boxShadow = '0 0 25px rgba(239, 68, 68, 0.6)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.boxShadow = '0 0 15px rgba(239, 68, 68, 0.4)'; }}
+                        >
+                            <X size={18} strokeWidth={3} />
                         </button>
                     </div>
                 </div>

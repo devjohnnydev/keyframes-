@@ -679,15 +679,70 @@ const DashboardAdmin = () => {
                                             <td style={{ padding: '1rem', opacity: 0.8 }}>{s.email || '—'}</td>
                                             <td style={{ padding: '1rem' }}>{s.turma?.nome}</td>
                                             <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                                                <button onClick={() => setBoletimAlunoId(s.id)} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,232,31,0.1)', border: '1px solid rgba(255,232,31,0.3)', color: '#ffe81f' }}>
+                                                <div 
+                                                    role="button"
+                                                    onClick={() => setBoletimAlunoId(s.id)} 
+                                                    className="btn" 
+                                                    style={{ 
+                                                        padding: '0.4rem 0.8rem', 
+                                                        fontSize: '0.7rem', 
+                                                        display: 'inline-flex', 
+                                                        alignItems: 'center', 
+                                                        gap: '0.4rem', 
+                                                        background: 'rgba(255,232,31,0.15)', 
+                                                        border: '1px solid rgba(255,232,31,0.4)', 
+                                                        color: '#ffe81f',
+                                                        cursor: 'pointer',
+                                                        borderRadius: '8px',
+                                                        fontWeight: 'bold',
+                                                        userSelect: 'none',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,232,31,0.25)'; e.currentTarget.style.transform = 'scale(1.03)'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,232,31,0.15)'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                                >
                                                     <FileText size={14} /> BOLETIM
-                                                </button>
-                                                <button onClick={() => handleResetPassword(s.id, s.nome)} className="btn btn-warning-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                                                    <ShieldAlert size={14} /> RESETAR SENHA
-                                                </button>
-                                                <button onClick={() => handleDeleteStudent(s.id, s.nome)} className="btn btn-danger-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                </div>
+                                                <div 
+                                                    role="button"
+                                                    onClick={() => handleResetPassword(s.id, s.nome)} 
+                                                    className="btn btn-warning-outline" 
+                                                    style={{ 
+                                                        padding: '0.4rem 0.8rem', 
+                                                        fontSize: '0.7rem', 
+                                                        display: 'inline-flex', 
+                                                        alignItems: 'center', 
+                                                        gap: '0.4rem',
+                                                        cursor: 'pointer',
+                                                        borderRadius: '8px',
+                                                        userSelect: 'none',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                                >
+                                                    <ShieldAlert size={14} /> REDEFINIR SENHA
+                                                </div>
+                                                <div 
+                                                    role="button"
+                                                    onClick={() => handleDeleteStudent(s.id, s.nome)} 
+                                                    className="btn btn-danger-outline" 
+                                                    style={{ 
+                                                        padding: '0.4rem 0.8rem', 
+                                                        fontSize: '0.7rem', 
+                                                        display: 'inline-flex', 
+                                                        alignItems: 'center', 
+                                                        gap: '0.4rem',
+                                                        cursor: 'pointer',
+                                                        borderRadius: '8px',
+                                                        userSelect: 'none',
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                                                >
                                                     <Trash2 size={14} /> EXCLUIR
-                                                </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
