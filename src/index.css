@@ -746,12 +746,13 @@ button.btn.btn-secondary-outline:hover {
 
 /* SELECTOR DE ATIVIDADES - BOTAO NEON BLACK-TO-GOLD */
 .btn.btn-activity-select {
-  background: #FFFFFF !important;
-  color: #000000 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #FFFFFF !important;
   font-weight: bold !important;
-  border: 2px solid #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
   border-radius: 20px !important;
   transition: all 0.3s ease !important;
+  box-shadow: none !important;
 }
 
 .btn.btn-activity-select:hover,
