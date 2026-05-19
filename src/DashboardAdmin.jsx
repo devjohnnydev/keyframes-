@@ -355,15 +355,15 @@ const DashboardAdmin = () => {
                         <div style={{ height: '40px', width: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
                         <button
                             onClick={() => setShowQRModal(true)}
-                            className="btn"
-                            style={{ background: 'rgba(251, 191, 36, 0.1)', color: 'var(--warning)', padding: '0.5rem 1rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid rgba(251, 191, 36, 0.2)' }}
+                            className="btn btn-warning-outline"
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                         >
                             <QrCode size={14} /> EXIBIR QR CODE
                         </button>
                         <button
                             onClick={handleDeleteTurma}
-                            className="btn"
-                            style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', padding: '0.5rem 1rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                            className="btn btn-danger-outline"
+                            style={{ padding: '0.5rem 1rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                         >
                             <Trash2 size={14} /> EXCLUIR GUILDA
                         </button>
@@ -485,10 +485,10 @@ const DashboardAdmin = () => {
                                             <td style={{ padding: '1rem', opacity: 0.8 }}>{s.email || '—'}</td>
                                             <td style={{ padding: '1rem' }}>{s.turma?.nome}</td>
                                             <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
-                                                <button onClick={() => handleResetPassword(s.id, s.nome)} className="btn glass-card" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <button onClick={() => handleResetPassword(s.id, s.nome)} className="btn btn-warning-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                     <ShieldAlert size={14} /> RESETAR SENHA
                                                 </button>
-                                                <button onClick={() => handleDeleteStudent(s.id, s.nome)} className="btn glass-card" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                <button onClick={() => handleDeleteStudent(s.id, s.nome)} className="btn btn-danger-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                     <Trash2 size={14} /> EXCLUIR
                                                 </button>
                                             </td>
@@ -686,15 +686,15 @@ const DashboardAdmin = () => {
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                                                     <button
                                                         onClick={() => setSelectedMissionForGrading(m)}
-                                                        className="btn glass-card"
-                                                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center' }}
+                                                        className="btn btn-secondary-outline"
+                                                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', justifyContent: 'center' }}
                                                     >
                                                         <Star size={14} /> AVALIAR
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteMission(m.id, m.titulo)}
-                                                        className="btn glass-card"
-                                                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', color: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                                                        className="btn btn-danger-outline"
+                                                        style={{ padding: '0.5rem 1rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                                                     >
                                                         <Trash2 size={14} /> EXCLUIR
                                                     </button>

@@ -470,3 +470,48 @@ button {
 .glass-card button:not(.btn-primary):not(.btn-secondary):not(.btn-success):not(.btn-danger):not(.btn-warning):hover {
   color: var(--primary) !important;
 }
+
+/* Custom highly specific outline buttons to bypass aggressive global button styling */
+.btn.btn-warning-outline,
+button.btn.btn-warning-outline {
+  background: rgba(251, 191, 36, 0.12) !important;
+  color: #FFE81F !important;
+  border: 1px solid rgba(251, 191, 36, 0.45) !important;
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.15) !important;
+  text-shadow: 0 0 5px rgba(251, 191, 36, 0.2) !important;
+}
+.btn.btn-warning-outline:hover,
+button.btn.btn-warning-outline:hover {
+  background: rgba(251, 191, 36, 0.25) !important;
+  color: #FFE81F !important;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.4) !important;
+}
+
+.btn.btn-danger-outline,
+button.btn.btn-danger-outline {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.45) !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.15) !important;
+  text-shadow: 0 0 5px rgba(239, 68, 68, 0.2) !important;
+}
+.btn.btn-danger-outline:hover,
+button.btn.btn-danger-outline:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #ef4444 !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important;
+}
+
+.btn.btn-secondary-outline,
+button.btn.btn-secondary-outline {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #A9A9A9 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
+}
+.btn.btn-secondary-outline:hover,
+button.btn.btn-secondary-outline:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1) !important;
+}
