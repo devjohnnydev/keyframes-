@@ -576,7 +576,7 @@ app.post('/api/notas', authenticate, authorize(['PROFESSOR']), asyncHandler(asyn
     const currentRanking = classAlunos.map(a => {
         const xpAtividades = a.notas.reduce((acc, n) => acc + (n.valor * 10), 0);
         const xpMissoes = a.notas_missoes.reduce((acc, n) => acc + (n.valor * 3), 0);
-        const totalXP = xpAtividades + xpMissoes;
+        const totalXP = xpAtividades + xpMissoes + (a.pontos_portal || 0);
         return { id: a.id, xp: totalXP };
     }).sort((a, b) => b.xp - a.xp);
 
@@ -683,7 +683,7 @@ app.post('/api/missoes/:id/avaliar', authenticate, authorize(['PROFESSOR']), asy
     const currentRanking = classAlunos.map(a => {
         const xpAtividades = a.notas.reduce((acc, n) => acc + (n.valor * 10), 0);
         const xpMissoes = a.notas_missoes.reduce((acc, n) => acc + (n.valor * 3), 0);
-        const totalXP = xpAtividades + xpMissoes;
+        const totalXP = xpAtividades + xpMissoes + (a.pontos_portal || 0);
         return { id: a.id, xp: totalXP };
     }).sort((a, b) => b.xp - a.xp);
 
@@ -862,7 +862,7 @@ app.get('/api/ranking', asyncHandler(async (req, res) => {
 
         const xpAtividades = visibleNotas.reduce((acc, n) => acc + (n.valor * 10), 0);
         const xpMissoes = visibleNotasMissoes.reduce((acc, n) => acc + (n.valor * 3), 0);
-        const totalXP = xpAtividades + xpMissoes;
+        const totalXP = xpAtividades + xpMissoes + (a.pontos_portal || 0);
 
         return {
             id: a.id,
@@ -890,6 +890,62 @@ app.patch('/api/aluno/perfil', authenticate, authorize(['ALUNO']), asyncHandler(
         data: { foto_url, info, nome, estado_humor }
     });
     res.json(updated);
+}));
+
+// GET /api/aluno/status-desafio
+app.get('/api/aluno/status-desafio', authenticate, authorize(['ALUNO']), asyncHandler(async (req, res) => {
+    const student = await prisma.aluno.findUnique({
+        where: { id: req.user.id }
+    });
+    if (!student) return res.status(404).json({ error: "Aluno não encontrado" });
+
+    const todayStr = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const lastStr = student.data_ultimo_desafio ? new Date(student.data_ultimo_desafio).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : null;
+    const completado = todayStr === lastStr;
+
+    res.json({
+        completado,
+        pontos_portal: student.pontos_portal
+    });
+}));
+
+// POST /api/aluno/completar-desafio
+app.post('/api/aluno/completar-desafio', authenticate, authorize(['ALUNO']), asyncHandler(async (req, res) => {
+    const { score } = req.body;
+    const points = Math.min(5, Math.max(0, parseInt(score) || 0));
+
+    const student = await prisma.aluno.findUnique({
+        where: { id: req.user.id }
+    });
+    if (!student) return res.status(404).json({ error: "Aluno não encontrado" });
+
+    const todayStr = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    const lastStr = student.data_ultimo_desafio ? new Date(student.data_ultimo_desafio).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : null;
+    if (todayStr === lastStr) {
+        return res.status(400).json({ error: "Você já realizou sua tentativa diária de hoje!" });
+    }
+
+    const updatedStudent = await prisma.aluno.update({
+        where: { id: req.user.id },
+        data: {
+            data_ultimo_desafio: new Date(),
+            pontos_portal: student.pontos_portal + points
+        }
+    });
+
+    // Create automatic notification message to student
+    await prisma.mensagem.create({
+        data: {
+            conteudo: `Parabéns! Você concluiu o portal diário e conquistou +${points} pontos para o seu ranking diário!`,
+            alunoId: req.user.id,
+            turmaId: student.turmaId
+        }
+    });
+
+    res.json({
+        success: true,
+        pontos_portal: updatedStudent.pontos_portal
+    });
 }));
 
 // --- APP SETUP ---

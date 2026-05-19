@@ -41,6 +41,11 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [needsRefresh, setNeedsRefresh] = useState(false);
 
+  const logout = useCallback(() => {
+    setToken(null);
+    setUser(null);
+  }, []);
+
   const authFetch = useCallback(async (url, options = {}) => {
     const headers = {
       ...options.headers,
@@ -49,11 +54,10 @@ export const DataProvider = ({ children }) => {
     };
     const res = await fetch(url, { ...options, headers });
     if (res.status === 401 || res.status === 403) {
-      // Handle unauthorized - logout
-      // logout();
+      logout();
     }
     return res;
-  }, [token]);
+  }, [token, logout]);
 
   const refreshAll = useCallback(async () => {
     if (!user) return;
@@ -83,8 +87,28 @@ export const DataProvider = ({ children }) => {
       setMissions(Array.isArray(resMissions) ? resMissions : []);
 
       if (user.role === 'ALUNO') {
-        // Map grades to a more accessible format if needed
         setGrades(resExtra || []);
+        
+        // Downward sync: Check if portal challenge is already completed on the server
+        try {
+          const statusRes = await authFetch(`${API_URL}/aluno/status-desafio`);
+          if (statusRes.ok) {
+            const statusData = await statusRes.json();
+            if (statusData.completado) {
+              const todayStr = new Date().toDateString();
+              localStorage.setItem('portalLastAttemptDate', todayStr);
+              localStorage.setItem('portalAttemptResult', 'SUCCESS');
+              // Ensure we have some display data so the card doesn't break
+              if (!localStorage.getItem('portalAttemptScore')) {
+                localStorage.setItem('portalAttemptScore', '5');
+                localStorage.setItem('portalAttemptPuzzles', '5');
+                localStorage.setItem('portalAttemptTimeSpent', '180');
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to sync portal status down:", e);
+        }
       } else {
         setStudents(Array.isArray(resExtra) ? resExtra : []);
       }
@@ -128,6 +152,31 @@ export const DataProvider = ({ children }) => {
 
       setToken(data.token);
       setUser(data.user);
+
+      // Automagically sync today's portal challenge score
+      if (data.user.role === 'ALUNO') {
+        const todayStr = new Date().toDateString();
+        const lastAttemptDate = localStorage.getItem('portalLastAttemptDate');
+        const attemptResult = localStorage.getItem('portalAttemptResult');
+        const attemptScore = localStorage.getItem('portalAttemptScore');
+        
+        if (lastAttemptDate === todayStr && attemptResult === 'SUCCESS' && attemptScore) {
+          try {
+            await fetch(`${API_URL}/aluno/completar-desafio`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${data.token}`
+              },
+              body: JSON.stringify({ score: parseInt(attemptScore) || 0 })
+            });
+            console.log("Desafio diário sincronizado com o servidor!");
+          } catch (err) {
+            console.error("Falha ao sincronizar desafio diário:", err);
+          }
+        }
+      }
+
       setNeedsRefresh(true);
       return data.user;
     } catch (e) {
@@ -136,14 +185,6 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    setClasses([]);
-    setSelectedClass(null);
-    setRanking([]);
   };
 
   const value = useMemo(() => ({
@@ -159,6 +200,31 @@ export const DataProvider = ({ children }) => {
       if (!res.ok) throw new Error(result.error);
       setToken(result.token);
       setUser(result.user);
+
+      // Automagically sync today's portal challenge score for newly registered users
+      if (result.user.role === 'ALUNO') {
+        const todayStr = new Date().toDateString();
+        const lastAttemptDate = localStorage.getItem('portalLastAttemptDate');
+        const attemptResult = localStorage.getItem('portalAttemptResult');
+        const attemptScore = localStorage.getItem('portalAttemptScore');
+        
+        if (lastAttemptDate === todayStr && attemptResult === 'SUCCESS' && attemptScore) {
+          try {
+            await fetch(`${API_URL}/aluno/completar-desafio`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${result.token}`
+              },
+              body: JSON.stringify({ score: parseInt(attemptScore) || 0 })
+            });
+            console.log("Desafio diário sincronizado com o servidor!");
+          } catch (err) {
+            console.error("Falha ao sincronizar desafio diário:", err);
+          }
+        }
+      }
+
       setNeedsRefresh(true);
     },
     createClass: async (name, materia, observacao) => {

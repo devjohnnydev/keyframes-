@@ -72,6 +72,8 @@ model Aluno {
   notas_missoes NotaMissao[]
   mensagens    Mensagem[] @relation("AlunoMensagens")
   posicao_anterior Int?
+  data_ultimo_desafio DateTime?
+  pontos_portal    Int       @default(0)
 }
 
 model Atividade {
