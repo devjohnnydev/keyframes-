@@ -3,6 +3,89 @@ import { useData } from './DataContext';
 import { Trophy, Users, Star, Plus, Send, LogOut, Award, BookOpen, RefreshCw, Key, Image as ImageIcon, UserCircle, CheckCircle, MessageCircle, Megaphone, Lock, ShieldAlert, Filter, TrendingUp, TrendingDown, Minus, Trash2, Camera, Upload, Target, QrCode } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
+const TechParticles = () => {
+    const particles = useMemo(() => {
+        const symbols = ['0', '1', '</>', 'code', 'const', 'let', 'JSON', 'git', 'fn()', 'class', 'SENAI', 'TI'];
+        return Array.from({ length: 25 }).map((_, idx) => ({
+            id: idx,
+            symbol: symbols[Math.floor(Math.random() * symbols.length)],
+            left: `${Math.random() * 95}%`,
+            delay: `${Math.random() * 8}s`,
+            duration: `${6 + Math.random() * 8}s`,
+            fontSize: `${0.7 + Math.random() * 0.9}rem`,
+        }));
+    }, []);
+
+    return (
+        <div className="projector-particles-container">
+            {particles.map(p => (
+                <div
+                    key={p.id}
+                    className="projector-particle"
+                    style={{
+                        left: p.left,
+                        animationDelay: p.delay,
+                        animationDuration: p.duration,
+                        fontSize: p.fontSize,
+                    }}
+                >
+                    {p.symbol}
+                </div>
+            ))}
+        </div>
+    );
+};
+
+const Sparkline = ({ up }) => {
+    const points = useMemo(() => {
+        const baseline = 15;
+        const segments = 6;
+        const stepX = 15;
+        const vals = [];
+        for (let i = 0; i <= segments; i++) {
+            const x = i * stepX;
+            let y;
+            if (up) {
+                y = baseline + (segments - i) * 3 - Math.random() * 5;
+            } else {
+                y = baseline + i * 3 - Math.random() * 5;
+            }
+            y = Math.max(2, Math.min(28, y));
+            vals.push(`${x},${y}`);
+        }
+        return `M ${vals.join(' L ')}`;
+    }, [up]);
+
+    return (
+        <svg className={`sparkline-svg ${up ? 'up' : 'down'}`} viewBox="0 0 90 30">
+            <path d={points} />
+        </svg>
+    );
+};
+
+const StockTickerTape = ({ ranking }) => {
+    const scrollContent = useMemo(() => {
+        if (!ranking || ranking.length === 0) {
+            return "🚀 MERCADO DE GUILDAS: Nenhuma movimentação recente registrada nas cotações de XP. | ⚠️ AVISO: Complete o Portal Diário de 3 minutos para somar até 5 pontos de XP!";
+        }
+        return ranking.map((r, i) => {
+            const rankDelta = r.posicao_anterior ? (r.posicao_anterior - (i + 1)) : 0;
+            const up = rankDelta >= 0;
+            const emoji = up ? '▲' : '▼';
+            const pct = rankDelta !== 0 ? Math.abs(rankDelta * 2.5).toFixed(1) : (Math.random() * 2 + 0.5).toFixed(1);
+            return `⚡ ${r.nome} (${r.turmaNome}) [${r.xp} XP] ${emoji} ${pct}% |`;
+        }).join('  ');
+    }, [ranking]);
+
+    return (
+        <div className="stock-ticker-tape">
+            <div className="stock-ticker-tape-scroll">
+                {scrollContent}
+            </div>
+        </div>
+    );
+};
+
 const DashboardAdmin = () => {
     const {
         logout, user, classes, selectedClass, setSelectedClass,
@@ -407,53 +490,162 @@ const DashboardAdmin = () => {
                             </div>
                         )}
                         {!selectedClass && user?.role !== 'ADMIN' ? (
-                            <div style={{ textAlign: 'center', padding: '3rem', opacity: 0.5 }}>
-                                <Trophy size={40} style={{ marginBottom: '1rem' }} />
-                                <p>Selecione uma turma para ver o ranking regional.</p>
+                            <div style={{ position: 'relative', overflow: 'hidden', minHeight: '520px', padding: '1rem 0' }}>
+                                {/* Floating binary/code tech particle streams */}
+                                <TechParticles />
+                                
+                                {/* Top flashing warning notice bar */}
+                                <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '12px', padding: '0.8rem 1.2rem', marginBottom: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.8rem', color: '#ff4d4d', fontWeight: 'bold', zIndex: 10, position: 'relative', boxShadow: '0 0 15px rgba(239, 68, 68, 0.1)' }}>
+                                    <ShieldAlert size={20} className="pulse" />
+                                    <marquee scrollamount="4" style={{ margin: 0, fontStyle: 'italic' }}>
+                                        ⚠️ AVISO DA GUILDA DE TI: Portal de Desafios Diários ativado! Lembre os alunos de realizarem o puzzle de 3 minutos para acumular até +5 pontos extras no Ranking. Novas missões de elite disponíveis!
+                                    </marquee>
+                                </div>
+
+                                <div className="prof-projector-wrapper">
+                                    {/* Left Card: Pointing finger illustration with glowing neon border */}
+                                    <div className="prof-projector-avatar-card">
+                                        <img src="/professor_avatar.jpg" className="prof-projector-avatar-img" alt="Professor de TI SENAI" />
+                                        <div className="prof-projector-avatar-overlay"></div>
+                                        <div className="prof-projector-avatar-content">
+                                            <div style={{ background: 'rgba(255, 232, 31, 0.15)', border: '1px solid var(--primary)', display: 'inline-block', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '900', color: 'var(--primary)', marginBottom: '0.5rem', fontFamily: "'Poller One', sans-serif" }}>
+                                                MESTRE OFICIAL
+                                            </div>
+                                            <h2 style={{ fontSize: '1.8rem', margin: '0 0 0.2rem 0', textShadow: '0 2px 10px rgba(0,0,0,0.5)', color: 'white' }}>
+                                                Mestre {user?.nome || 'Johnny'}
+                                            </h2>
+                                            <p style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 'bold', margin: 0, textShadow: '0 1px 5px rgba(0,0,0,0.5)' }}>
+                                                PROFESSOR DE TI - SENAI
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Side: Informações da Guilda, Bio & Stock Ticker Summary */}
+                                    <div className="prof-projector-info-section">
+                                        <div>
+                                            <h3 style={{ color: 'var(--primary)', fontSize: '1.4rem', marginBottom: '1rem', borderBottom: '1px solid rgba(255, 232, 31, 0.2)', paddingBottom: '0.5rem' }}>
+                                                SOBRE A GUILDA / MIM
+                                            </h3>
+                                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#e0e0e0', marginBottom: '1rem' }}>
+                                                Seja muito bem-vindo ao ecossistema tecnológico do **Ranking SENAI**! Este painel avançado foi concebido especificamente para projeção direta em sala de aula, criando um ambiente imersivo de competição saudável.
+                                            </p>
+                                            <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: '#e0e0e0' }}>
+                                                A dinâmica funciona como uma **Bolsa de Valores das Guildas**: o engajamento diário, resolução de missões cooperativas de código e acertos rápidos no portal valorizam o portfólio da turma, movendo os indicadores de XP em tempo real!
+                                            </p>
+                                            
+                                            <div style={{ marginTop: '1.5rem' }}>
+                                                <h4 style={{ fontSize: '0.8rem', color: 'var(--secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Rituais Ativos da Guilda</h4>
+                                                <div className="ritual-pill">
+                                                    <strong style={{ color: 'var(--primary)' }}>⚡ Portal Diário (Wordle-like)</strong>
+                                                    <p style={{ fontSize: '0.8rem', opacity: 0.8, margin: '0.2rem 0 0 0' }}>Estudantes resolvem desafios de código sob pressão. 3 min max, renderiza até +5 pontos.</p>
+                                                </div>
+                                                <div className="ritual-pill">
+                                                    <strong style={{ color: 'var(--primary)' }}>🏆 Quotas e Gráficos da Bolsa</strong>
+                                                    <p style={{ fontSize: '0.8rem', opacity: 0.8, margin: '0.2rem 0 0 0' }}>Análise dinâmica de quem subiu e caiu no ranking, gerando indicadores de volatilidade de XP.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                <div style={{ background: 'rgba(251, 191, 36, 0.1)', padding: '0.5rem', borderRadius: '8px', border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+                                                    <Trophy size={20} color="var(--primary)" />
+                                                </div>
+                                                <div>
+                                                    <h4 style={{ margin: 0, fontSize: '0.85rem' }}>Bolsa de Valores Ativa</h4>
+                                                    <p style={{ margin: 0, fontSize: '0.7rem', opacity: 0.6 }}>Selecione uma turma para carregar as cotações</p>
+                                                </div>
+                                            </div>
+                                            <div style={{ animation: 'pulse 2s infinite' }}>
+                                                <span className="stock-badge-up">LIVE CONNECTED</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         ) : (
-                            <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                    <thead>
-                                        <tr style={{ textAlign: 'left', color: 'var(--text-muted)', borderBottom: '1px solid var(--glass-border)' }}>
-                                            <th style={{ padding: '1rem' }}>POSIÇÃO</th>
-                                            <th style={{ padding: '1rem' }}>ALUNO</th>
-                                            <th style={{ padding: '1rem' }}>GUILDA (TURMA)</th>
-                                            {user?.role === 'ADMIN' && <th style={{ padding: '1rem' }}>MESTRE</th>}
-                                            <th style={{ padding: '1rem' }}>XP TOTAL</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredRanking.map((r, i) => (
-                                            <tr key={r.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                                <td style={{ padding: '1rem', fontWeight: 'bold' }}>
-                                                    {i + 1}º
-                                                    {r.posicao_anterior && (
-                                                        <span style={{ marginLeft: '8px' }}>
-                                                            {i + 1 < r.posicao_anterior ? (
-                                                                <TrendingUp size={16} color="var(--success)" />
-                                                            ) : i + 1 > r.posicao_anterior ? (
-                                                                <TrendingDown size={16} color="var(--danger)" />
-                                                            ) : (
-                                                                <Minus size={16} color="var(--text-muted)" opacity={0.3} />
-                                                            )}
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)' }}>
-                                                        {r.foto_url ? <img src={getFullImageUrl(r.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={14} style={{ margin: '8px' }} />}
-                                                    </div>
-                                                    {r.estado_humor && <span style={{ marginRight: '6px' }} title="Humor do dia">{r.estado_humor}</span>}
-                                                    {r.nome}
-                                                </td>
-                                                <td style={{ padding: '1rem', color: 'var(--primary)' }}>{r.turmaNome}</td>
-                                                {user?.role === 'ADMIN' && <td style={{ padding: '1rem', color: 'var(--secondary)' }}>{r.professorNome}</td>}
-                                                <td style={{ padding: '1rem', fontWeight: 'bold' }}>{r.xp} XP</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div>
+                                {/* Stock exchange style scrolling ticker tape */}
+                                <StockTickerTape ranking={filteredRanking} />
+
+                                <div className="stock-market-board">
+                                    <h3 style={{ color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontFamily: "'Poller One', sans-serif" }}>
+                                        💰 COTAÇÕES DE XP DA GUILDA: {selectedClass ? selectedClass.nome : 'GERAL'}
+                                    </h3>
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ textAlign: 'left', color: 'var(--text-muted)', borderBottom: '2px solid var(--glass-border)', fontSize: '0.85rem' }}>
+                                                    <th style={{ padding: '1rem' }}>TICKER / POSIÇÃO</th>
+                                                    <th style={{ padding: '1rem' }}>ATIVO / ALUNO</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'center' }}>TENDÊNCIA (GRÁFICO)</th>
+                                                    <th style={{ padding: '1rem', textAlign: 'center' }}>VARIAÇÃO (24H)</th>
+                                                    <th style={{ padding: '1rem' }}>GUILDA (TURMA)</th>
+                                                    {user?.role === 'ADMIN' && <th style={{ padding: '1rem' }}>MESTRE</th>}
+                                                    <th style={{ padding: '1rem', textAlign: 'right' }}>VALOR DE MERCADO</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {filteredRanking.map((r, i) => {
+                                                    const rankDelta = r.posicao_anterior ? (r.posicao_anterior - (i + 1)) : 0;
+                                                    const isUp = rankDelta > 0;
+                                                    const isDown = rankDelta < 0;
+                                                    const pct = rankDelta !== 0 ? Math.abs(rankDelta * 2.5).toFixed(1) : "0.0";
+                                                    
+                                                    return (
+                                                        <tr key={r.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: isUp ? 'rgba(74, 222, 128, 0.02)' : isDown ? 'rgba(239, 68, 68, 0.02)' : 'transparent', transition: 'background 0.3s ease' }}>
+                                                            <td style={{ padding: '1rem', fontWeight: 'bold' }}>
+                                                                <span style={{ fontSize: '1.1rem', marginRight: '6px', color: isUp ? '#4ade80' : isDown ? '#ef4444' : '#ffffff' }}>
+                                                                    {i + 1}º
+                                                                </span>
+                                                                {rankDelta !== 0 ? (
+                                                                    isUp ? (
+                                                                        <span style={{ color: '#4ade80', fontSize: '0.75rem', fontWeight: 'bold' }}>▲ {Math.abs(rankDelta)}</span>
+                                                                    ) : (
+                                                                        <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold' }}>▼ {Math.abs(rankDelta)}</span>
+                                                                    )
+                                                                ) : (
+                                                                    <span style={{ color: 'var(--secondary)', fontSize: '0.75rem', opacity: 0.5 }}>—</span>
+                                                                )}
+                                                            </td>
+                                                            <td style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+                                                                <div style={{ width: '35px', height: '35px', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.1)' }}>
+                                                                    {r.foto_url ? <img src={getFullImageUrl(r.foto_url)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <UserCircle size={14} style={{ margin: '10px' }} />}
+                                                                </div>
+                                                                <div>
+                                                                    <div style={{ fontWeight: 'bold', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                                                                        {r.estado_humor && <span title="Humor do dia">{r.estado_humor}</span>}
+                                                                        {r.nome}
+                                                                    </div>
+                                                                    <span style={{ fontSize: '0.65rem', opacity: 0.5, letterSpacing: '0.5px' }}>CO-DER #{r.id}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                                <Sparkline up={isUp || rankDelta === 0} />
+                                                            </td>
+                                                            <td style={{ padding: '1rem', textAlign: 'center' }}>
+                                                                {rankDelta !== 0 ? (
+                                                                    isUp ? (
+                                                                        <span className="stock-badge-up">▲ +{pct}%</span>
+                                                                    ) : (
+                                                                        <span className="stock-badge-down">▼ -{pct}%</span>
+                                                                    )
+                                                                ) : (
+                                                                    <span style={{ fontSize: '0.75rem', color: 'var(--secondary)', opacity: 0.7 }}>— 0.0%</span>
+                                                                )}
+                                                            </td>
+                                                            <td style={{ padding: '1rem', color: 'var(--primary)', fontWeight: 'bold' }}>{r.turmaNome}</td>
+                                                            {user?.role === 'ADMIN' && <td style={{ padding: '1rem', color: 'var(--secondary)' }}>{r.professorNome}</td>}
+                                                            <td style={{ padding: '1rem', textAlign: 'right', fontWeight: '900', color: '#FFFFFF', fontSize: '1.05rem', textShadow: '0 0 8px rgba(255,255,255,0.2)' }}>
+                                                                $ {r.xp.toLocaleString()} XP
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
