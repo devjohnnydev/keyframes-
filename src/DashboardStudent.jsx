@@ -4,6 +4,39 @@ import { Trophy, Star, MessageSquare, User as UserIcon, LogOut, Award, RefreshCw
 import { Scanner } from '@yudiel/react-qr-scanner';
 import BoletimAluno from './BoletimAluno';
 
+const TechParticles = () => {
+    const particles = useMemo(() => {
+        const symbols = ['0', '1', '</>', 'code', 'const', 'let', 'JSON', 'git', 'fn()', 'class', 'SENAI', 'TI'];
+        return Array.from({ length: 25 }).map((_, idx) => ({
+            id: idx,
+            symbol: symbols[Math.floor(Math.random() * symbols.length)],
+            left: `${Math.random() * 95}%`,
+            delay: `${Math.random() * 8}s`,
+            duration: `${6 + Math.random() * 8}s`,
+            fontSize: `${0.7 + Math.random() * 0.9}rem`,
+        }));
+    }, []);
+
+    return (
+        <div className="projector-particles-container">
+            {particles.map(p => (
+                <div
+                    key={p.id}
+                    className="projector-particle"
+                    style={{
+                        left: p.left,
+                        animationDelay: p.delay,
+                        animationDuration: p.duration,
+                        fontSize: p.fontSize,
+                    }}
+                >
+                    {p.symbol}
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const moods = [
     { emoji: '😀', label: 'Feliz' },
     { emoji: '🔥', label: 'Focado' },
@@ -629,9 +662,12 @@ const DashboardStudent = () => {
                 )}
 
                 {tab === 'ranking' && (
-                    <div>
-                        <h3 style={{ marginBottom: '2rem' }}>Hall da Fama (Membros da Guilda)</h3>
-                        <div style={{ overflowX: 'auto' }}>
+                    <div className="stock-market-board" style={{ marginTop: 0 }}>
+                        <TechParticles />
+                        <h3 style={{ marginBottom: '2rem', color: 'var(--primary)', fontFamily: "'Poller One', sans-serif", position: 'relative', zIndex: 2 }}>
+                            Hall da Fama (Membros da Guilda)
+                        </h3>
+                        <div style={{ overflowX: 'auto', position: 'relative', zIndex: 2 }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
                                     <tr style={{ textAlign: 'left', color: 'var(--text-muted)', borderBottom: '1px solid var(--glass-border)' }}>

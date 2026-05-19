@@ -571,10 +571,11 @@ const DashboardAdmin = () => {
                                 <StockTickerTape ranking={filteredRanking} />
 
                                 <div className="stock-market-board">
-                                    <h3 style={{ color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontFamily: "'Poller One', sans-serif" }}>
+                                    <TechParticles />
+                                    <h3 style={{ color: 'var(--primary)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.6rem', fontFamily: "'Poller One', sans-serif", position: 'relative', zIndex: 2 }}>
                                         💰 COTAÇÕES DE XP DA GUILDA: {selectedClass ? selectedClass.nome : 'GERAL'}
                                     </h3>
-                                    <div style={{ overflowX: 'auto' }}>
+                                    <div style={{ overflowX: 'auto', position: 'relative', zIndex: 2 }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
                                                 <tr style={{ textAlign: 'left', color: 'var(--text-muted)', borderBottom: '2px solid var(--glass-border)', fontSize: '0.85rem' }}>
