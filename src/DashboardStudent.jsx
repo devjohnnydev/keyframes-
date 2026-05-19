@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useData } from './DataContext';
-import { Trophy, Star, MessageSquare, User as UserIcon, LogOut, Award, RefreshCw, Quote, Info, Settings, Camera, Save, BookOpen, CheckCircle, Bell, Lock, Upload, Image as ImageIcon, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Trophy, Star, MessageSquare, User as UserIcon, LogOut, Award, RefreshCw, Quote, Info, Settings, Camera, Save, BookOpen, CheckCircle, Bell, Lock, Upload, Image as ImageIcon, TrendingUp, TrendingDown, Minus, FileText } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
+import BoletimAluno from './BoletimAluno';
 
 const moods = [
     { emoji: '😀', label: 'Feliz' },
@@ -16,7 +17,7 @@ const moods = [
 
 const DashboardStudent = () => {
     const {
-    user, logout, ranking, loading, refreshAll, updateStudentProfile, updateStudentPassword, uploadFile, activities, grades, messages, joinClass, markMessageAsRead, missions, sendEmojiReaction
+    user, token, logout, ranking, loading, refreshAll, updateStudentProfile, updateStudentPassword, uploadFile, activities, grades, messages, joinClass, markMessageAsRead, missions, sendEmojiReaction
     } = useData();
 
     const [tab, setTab] = useState('ranking');
@@ -39,6 +40,7 @@ const DashboardStudent = () => {
     const [joinCode, setJoinCode] = useState('');
     const [showQRScanner, setShowQRScanner] = useState(false);
     const [showMoodSelector, setShowMoodSelector] = useState(false);
+    const [showBoletim, setShowBoletim] = useState(false);
     const fileInputRef = useRef(null);
 
     // Helper to get full image URL
@@ -381,6 +383,7 @@ const DashboardStudent = () => {
                 </button>
                 <button onClick={() => setTab('missoes')} className={`btn ${tab === 'missoes' ? 'btn-active' : ''}`} style={{ flex: 1 }}><Star size={18} /> Missões</button>
                 <button onClick={() => setTab('status')} className={`btn ${tab === 'status' ? 'btn-active' : ''}`} style={{ flex: 1 }}><Trophy size={18} /> Status</button>
+                <button onClick={() => setShowBoletim(true)} className="btn" style={{ flex: 1, background: 'rgba(255,232,31,0.1)', border: '1px solid rgba(255,232,31,0.3)', color: '#ffe81f' }}><FileText size={18} /> Meu Boletim</button>
             </nav>
 
             <main className="glass-card" style={{ padding: '2.5rem' }}>
@@ -726,6 +729,14 @@ const DashboardStudent = () => {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {showBoletim && user && (
+                <BoletimAluno
+                    alunoId={user.id}
+                    token={token}
+                    onClose={() => setShowBoletim(false)}
+                />
             )}
         </div >
     );

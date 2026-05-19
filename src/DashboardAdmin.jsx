@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useData } from './DataContext';
-import { Trophy, Users, Star, Plus, Send, LogOut, Award, BookOpen, RefreshCw, Key, Image as ImageIcon, UserCircle, CheckCircle, MessageCircle, Megaphone, Lock, ShieldAlert, Filter, TrendingUp, TrendingDown, Minus, Trash2, Camera, Upload, Target, QrCode } from 'lucide-react';
+import { Trophy, Users, Star, Plus, Send, LogOut, Award, BookOpen, RefreshCw, Key, Image as ImageIcon, UserCircle, CheckCircle, MessageCircle, Megaphone, Lock, ShieldAlert, Filter, TrendingUp, TrendingDown, Minus, Trash2, Camera, Upload, Target, QrCode, FileText } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import BoletimAluno from './BoletimAluno';
 
 const TechParticles = () => {
     const particles = useMemo(() => {
@@ -88,7 +89,7 @@ const StockTickerTape = ({ ranking }) => {
 
 const DashboardAdmin = () => {
     const {
-        logout, user, classes, selectedClass, setSelectedClass,
+        logout, user, token, classes, selectedClass, setSelectedClass,
         addActivity, setStudentGrade, ranking, refreshAll, loading,
         createClass, deleteClass, updateProfile, activities, students, sendMessage, messages, resetStudentPassword, deleteStudent, uploadFile,
         missions, addMission, deleteMission, gradeMission
@@ -101,6 +102,7 @@ const DashboardAdmin = () => {
     const [previewUrl, setPreviewUrl] = useState(user?.foto_url || '');
     const [selectedFile, setSelectedFile] = useState(null);
     const [showQRModal, setShowQRModal] = useState(false);
+    const [boletimAlunoId, setBoletimAlunoId] = useState(null);
     const fileInputRef = useRef(null);
 
     // Helper to get full image URL
@@ -676,7 +678,10 @@ const DashboardAdmin = () => {
                                             </td>
                                             <td style={{ padding: '1rem', opacity: 0.8 }}>{s.email || '—'}</td>
                                             <td style={{ padding: '1rem' }}>{s.turma?.nome}</td>
-                                            <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                                            <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                                <button onClick={() => setBoletimAlunoId(s.id)} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,232,31,0.1)', border: '1px solid rgba(255,232,31,0.3)', color: '#ffe81f' }}>
+                                                    <FileText size={14} /> BOLETIM
+                                                </button>
                                                 <button onClick={() => handleResetPassword(s.id, s.nome)} className="btn btn-warning-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                                                     <ShieldAlert size={14} /> RESETAR SENHA
                                                 </button>
@@ -994,6 +999,14 @@ const DashboardAdmin = () => {
                         </button>
                     </div>
                 </div>
+            )}
+
+            {boletimAlunoId && (
+                <BoletimAluno
+                    alunoId={boletimAlunoId}
+                    token={token}
+                    onClose={() => setBoletimAlunoId(null)}
+                />
             )}
         </div>
     );

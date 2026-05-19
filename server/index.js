@@ -948,6 +948,132 @@ app.post('/api/aluno/completar-desafio', authenticate, authorize(['ALUNO']), asy
     });
 }));
 
+// GET /api/aluno/:id/boletim — Returns full academic record (professor or self)
+app.get('/api/aluno/:id/boletim', authenticate, authorize(['PROFESSOR', 'ADMIN', 'ALUNO']), asyncHandler(async (req, res) => {
+    const alunoId = parseInt(req.params.id);
+
+    // Students can only view their own boletim
+    if (req.user.role === 'ALUNO' && req.user.id !== alunoId) {
+        return res.status(403).json({ error: 'Acesso negado.' });
+    }
+
+    const aluno = await prisma.aluno.findUnique({
+        where: { id: alunoId },
+        include: {
+            turma: { include: { professor: true } },
+            professor: true,
+            notas: {
+                include: { atividade: true },
+                orderBy: { data_avaliacao: 'asc' }
+            },
+            notas_missoes: {
+                include: { missao: true },
+                orderBy: { data_avaliacao: 'asc' }
+            }
+        }
+    });
+
+    if (!aluno) return res.status(404).json({ error: 'Aluno não encontrado.' });
+
+    // Professor can only view students from their own classes
+    if (req.user.role === 'PROFESSOR') {
+        const myClasses = await prisma.turma.findMany({ where: { professorId: req.user.id }, select: { id: true } });
+        const myClassIds = myClasses.map(c => c.id);
+        if (aluno.turmaId && !myClassIds.includes(aluno.turmaId)) {
+            return res.status(403).json({ error: 'Acesso negado.' });
+        }
+    }
+
+    // Compute XP and rank
+    const classRanking = aluno.turmaId ? await prisma.aluno.findMany({
+        where: { turmaId: aluno.turmaId },
+        include: { notas: true, notas_missoes: true }
+    }) : [];
+
+    const rankedList = classRanking.map(a => {
+        const xpAtiv = a.notas.reduce((acc, n) => acc + (n.valor * 10), 0);
+        const xpMis = a.notas_missoes.reduce((acc, n) => acc + (n.valor * 3), 0);
+        return { id: a.id, xp: xpAtiv + xpMis + (a.pontos_portal || 0) };
+    }).sort((a, b) => b.xp - a.xp);
+
+    const myXpAtiv = aluno.notas.reduce((acc, n) => acc + (n.valor * 10), 0);
+    const myXpMis = aluno.notas_missoes.reduce((acc, n) => acc + (n.valor * 3), 0);
+    const totalXP = myXpAtiv + myXpMis + (aluno.pontos_portal || 0);
+    const rankPos = rankedList.findIndex(r => r.id === alunoId) + 1;
+
+    // All activities in the class (even if not graded)
+    const allActivities = aluno.turmaId ? await prisma.atividade.findMany({
+        where: { turmaId: aluno.turmaId },
+        orderBy: { data_criacao: 'asc' }
+    }) : [];
+
+    const allMissions = aluno.turmaId ? await prisma.missao.findMany({
+        where: { turmaId: aluno.turmaId },
+        orderBy: { data_criacao: 'asc' }
+    }) : [];
+
+    res.json({
+        aluno: {
+            id: aluno.id,
+            nome: aluno.nome,
+            email: aluno.email,
+            foto_url: aluno.foto_url,
+            info: aluno.info,
+            estado_humor: aluno.estado_humor,
+            data_criacao: aluno.data_criacao,
+            pontos_portal: aluno.pontos_portal || 0,
+        },
+        turma: aluno.turma ? {
+            id: aluno.turma.id,
+            nome: aluno.turma.nome,
+            materia: aluno.turma.materia,
+            observacao: aluno.turma.observacao,
+            codigo: aluno.turma.codigo,
+        } : null,
+        professor: aluno.turma?.professor ? {
+            id: aluno.turma.professor.id,
+            nome: aluno.turma.professor.nome,
+            email: aluno.turma.professor.email,
+            foto_url: aluno.turma.professor.foto_url,
+            bio: aluno.turma.professor.bio,
+            mensagem_incentivo: aluno.turma.professor.mensagem_incentivo,
+        } : null,
+        stats: {
+            totalXP,
+            xpAtividades: myXpAtiv,
+            xpMissoes: myXpMis,
+            xpPortal: aluno.pontos_portal || 0,
+            rankPosition: rankPos,
+            totalStudents: classRanking.length,
+            nivel: Math.floor(1 + Math.sqrt(totalXP / 100)),
+        },
+        atividades: allActivities.map(a => {
+            const nota = aluno.notas.find(n => n.atividadeId === a.id);
+            return {
+                id: a.id,
+                titulo: a.titulo,
+                descricao: a.descricao,
+                nota_maxima: a.nota_maxima,
+                data_criacao: a.data_criacao,
+                nota: nota ? { valor: nota.valor, data_avaliacao: nota.data_avaliacao, reacao_emoji: nota.reacao_emoji } : null,
+            };
+        }),
+        missoes: allMissions.map(m => {
+            const nota = aluno.notas_missoes.find(n => n.missaoId === m.id);
+            return {
+                id: m.id,
+                titulo: m.titulo,
+                descricao: m.descricao,
+                recompensa: m.recompensa,
+                prazo: m.prazo,
+                data_criacao: m.data_criacao,
+                nota: nota ? { valor: nota.valor, data_avaliacao: nota.data_avaliacao } : null,
+            };
+        }),
+        gerado_em: new Date().toISOString(),
+    });
+}));
+
 // --- APP SETUP ---
 
 app.get(/.*/, (req, res) => {
