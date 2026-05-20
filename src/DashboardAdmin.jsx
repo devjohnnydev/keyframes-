@@ -92,7 +92,7 @@ const DashboardAdmin = () => {
         logout, user, token, classes, selectedClass, setSelectedClass,
         addActivity, setStudentGrade, ranking, refreshAll, loading,
         createClass, deleteClass, updateProfile, activities, students, sendMessage, messages, resetStudentPassword, deleteStudent, uploadFile,
-        missions, addMission, deleteMission, gradeMission
+        missions, addMission, deleteMission, gradeMission, compressImage
     } = useData();
 
     const [tab, setTab] = useState('ranking');
@@ -181,14 +181,20 @@ const DashboardAdmin = () => {
             let finalFotoUrl = profileData.foto_url;
 
             if (selectedFile) {
-                // Convert image file directly to a permanent Base64 string to prevent container-wipe expiries
-                const base64 = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = (err) => reject(err);
-                    reader.readAsDataURL(selectedFile);
-                });
-                finalFotoUrl = base64;
+                // Compress the image client-side to prevent localStorage/DB quota issues
+                try {
+                    finalFotoUrl = await compressImage(selectedFile);
+                } catch (err) {
+                    console.error("Erro ao comprimir imagem:", err);
+                    // fallback to FileReader
+                    const base64 = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = (e) => reject(e);
+                        reader.readAsDataURL(selectedFile);
+                    });
+                    finalFotoUrl = base64;
+                }
             }
 
             await updateProfile({ ...profileData, foto_url: finalFotoUrl });

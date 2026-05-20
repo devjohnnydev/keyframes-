@@ -19,6 +19,52 @@ export const useData = () => {
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+const compressImage = (file, maxWidth = 300, maxHeight = 300, quality = 0.7) => {
+  return new Promise((resolve, reject) => {
+    if (!file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedBase64);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+};
+
 export const DataProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('eduGameToken'));
   const [user, setUser] = useState(() => {
@@ -139,9 +185,44 @@ export const DataProvider = ({ children }) => {
   }, [token]);
 
   useEffect(() => {
-    if (user) localStorage.setItem('eduGameUser', JSON.stringify(user));
-    else localStorage.removeItem('eduGameUser');
+    if (user) {
+      let userToSave = user;
+      // Strip large photos (e.g. over 100KB) from localStorage to prevent QuotaExceededError
+      if (user.foto_url && user.foto_url.startsWith('data:') && user.foto_url.length > 102400) {
+        userToSave = { ...user, foto_url: 'STRIPPED_LARGE_IMAGE' };
+      }
+      try {
+        localStorage.setItem('eduGameUser', JSON.stringify(userToSave));
+      } catch (e) {
+        console.error("Failed to save user to localStorage:", e);
+        try {
+          localStorage.setItem('eduGameUser', JSON.stringify({ ...userToSave, foto_url: null }));
+        } catch (err) {}
+      }
+    } else {
+      localStorage.removeItem('eduGameUser');
+    }
   }, [user]);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_URL}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const freshUser = await res.json();
+          setUser(freshUser);
+        } else if (res.status === 401 || res.status === 403) {
+          logout();
+        }
+      } catch (e) {
+        console.error("Erro ao carregar perfil inicial:", e);
+      }
+    };
+    fetchMe();
+  }, [token, logout]);
 
   useEffect(() => {
     if (user && needsRefresh) refreshAll();
@@ -398,7 +479,8 @@ export const DataProvider = ({ children }) => {
       setNeedsRefresh(true);
       return await res.json();
     },
-    refreshAll: () => setNeedsRefresh(true)
+    refreshAll: () => setNeedsRefresh(true),
+    compressImage
   }), [user, token, loading, classes, selectedClass, students, activities, missions, grades, ranking, messages, authFetch]);
 
   return (

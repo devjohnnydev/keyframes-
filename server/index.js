@@ -237,6 +237,28 @@ app.post('/api/auth/login', asyncHandler(async (req, res) => {
     res.status(401).json({ error: 'E-mail ou senha incorretos' });
 }));
 
+app.get('/api/auth/me', authenticate, asyncHandler(async (req, res) => {
+    if (req.user.role === 'ADMIN') {
+        const admin = await prisma.administrador.findUnique({ where: { id: req.user.id } });
+        if (!admin) return res.status(404).json({ error: 'Usuário não encontrado' });
+        return res.json({ ...admin, role: 'ADMIN' });
+    }
+    if (req.user.role === 'PROFESSOR') {
+        const professor = await prisma.professor.findUnique({ where: { id: req.user.id } });
+        if (!professor) return res.status(404).json({ error: 'Usuário não encontrado' });
+        return res.json({ ...professor, role: 'PROFESSOR' });
+    }
+    if (req.user.role === 'ALUNO') {
+        const student = await prisma.aluno.findUnique({
+            where: { id: req.user.id },
+            include: { turma: true, professor: true }
+        });
+        if (!student) return res.status(404).json({ error: 'Usuário não encontrado' });
+        return res.json({ ...student, role: 'ALUNO' });
+    }
+    res.status(400).json({ error: 'Role inválido' });
+}));
+
 // --- ADMIN ROUTES ---
 
 app.get('/api/admin/professores', authenticate, authorize(['ADMIN']), asyncHandler(async (req, res) => {
