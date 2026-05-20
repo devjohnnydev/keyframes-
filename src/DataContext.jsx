@@ -54,6 +54,13 @@ export const DataProvider = ({ children }) => {
     };
     const res = await fetch(url, { ...options, headers });
     if (res.status === 401 || res.status === 403) {
+      let bodyText = "";
+      try {
+        bodyText = await res.clone().text();
+      } catch (e) {}
+      const errMsg = `Status: ${res.status}, URL: ${url}, Body: ${bodyText}`;
+      localStorage.setItem('eduGameLastLogoutError', errMsg);
+      alert(`[DIAGNÓSTICO] Ocorreu um logout automático!\nRota: ${url}\nStatus: ${res.status}\nResposta: ${bodyText}`);
       logout();
     }
     return res;
