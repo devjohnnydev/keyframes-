@@ -65,7 +65,9 @@ export const DataProvider = ({ children }) => {
       setLoading(true);
 
       const promises = [
-        authFetch(`${API_URL}/turmas`).then(r => r.json()),
+        user.role === 'ALUNO'
+          ? Promise.resolve([])
+          : authFetch(`${API_URL}/turmas`).then(r => r.json()),
         authFetch(`${API_URL}/ranking`).then(r => r.json()),
         authFetch(`${API_URL}/atividades`).then(r => r.json()),
         authFetch(`${API_URL}/mensagens`).then(r => r.json()),
