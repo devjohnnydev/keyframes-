@@ -80,10 +80,15 @@ const DashboardStudent = () => {
     const getFullImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('http') || url.startsWith('data:')) return url;
-        // Assume relative URLs are served from the backend
-        const baseUrl = window.location.origin.includes('localhost:5173')
-            ? 'http://localhost:3001'
-            : window.location.origin;
+        
+        let baseUrl = '';
+        const envApiUrl = import.meta.env.VITE_API_URL;
+        if (envApiUrl && envApiUrl.startsWith('http')) {
+            baseUrl = envApiUrl.replace(/\/api\/?$/, '');
+        } else {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            baseUrl = isLocal ? 'http://localhost:3001' : window.location.origin;
+        }
         return `${baseUrl}${url}`;
     };
 

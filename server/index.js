@@ -101,7 +101,72 @@ async function initAdmin() {
         console.log('Super Admin created!');
     }
 }
-initAdmin().catch(console.error);
+
+async function normalizeDatabaseEmails() {
+    try {
+        console.log('Iniciando normalização de e-mails no banco de dados...');
+        
+        // 1. Admins
+        const admins = await prisma.administrador.findMany();
+        for (const admin of admins) {
+            const normalized = admin.email.trim().toLowerCase();
+            if (admin.email !== normalized) {
+                try {
+                    await prisma.administrador.update({
+                        where: { id: admin.id },
+                        data: { email: normalized }
+                    });
+                    console.log(`Email do admin ${admin.nome} normalizado para ${normalized}`);
+                } catch (e) {
+                    console.error(`Falha ao normalizar email do admin ${admin.id}:`, e.message);
+                }
+            }
+        }
+
+        // 2. Professors
+        const professors = await prisma.professor.findMany();
+        for (const prof of professors) {
+            const normalized = prof.email.trim().toLowerCase();
+            if (prof.email !== normalized) {
+                try {
+                    await prisma.professor.update({
+                        where: { id: prof.id },
+                        data: { email: normalized }
+                    });
+                    console.log(`Email do professor ${prof.nome} normalizado para ${normalized}`);
+                } catch (e) {
+                    console.error(`Falha ao normalizar email do professor ${prof.id}:`, e.message);
+                }
+            }
+        }
+
+        // 3. Alunos
+        const alunos = await prisma.aluno.findMany();
+        for (const aluno of alunos) {
+            if (aluno.email) {
+                const normalized = aluno.email.trim().toLowerCase();
+                if (aluno.email !== normalized) {
+                    try {
+                        await prisma.aluno.update({
+                            where: { id: aluno.id },
+                            data: { email: normalized }
+                        });
+                        console.log(`Email do aluno ${aluno.nome} normalizado para ${normalized}`);
+                    } catch (e) {
+                        console.error(`Falha ao normalizar email do aluno ${aluno.id}:`, e.message);
+                    }
+                }
+            }
+        }
+        console.log('Normalização de e-mails concluída!');
+    } catch (err) {
+        console.error('Erro ao normalizar banco de dados:', err);
+    }
+}
+
+initAdmin()
+    .then(() => normalizeDatabaseEmails())
+    .catch(console.error);
 
 app.post('/api/upload', authenticate, upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
@@ -120,24 +185,48 @@ app.post('/api/upload', authenticate, upload.single('file'), (req, res) => {
 
 app.post('/api/auth/login', asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+        return res.status(400).json({ error: 'E-mail é obrigatório' });
+    }
 
     // 1. Admin Login
-    const admin = await prisma.administrador.findUnique({ where: { email } });
+    const admin = await prisma.administrador.findFirst({
+        where: {
+            email: {
+                equals: normalizedEmail,
+                mode: 'insensitive'
+            }
+        }
+    });
     if (admin && await bcrypt.compare(password, admin.senha_hash)) {
         const token = jwt.sign({ id: admin.id, role: 'ADMIN', name: admin.nome }, JWT_SECRET);
         return res.json({ token, user: { ...admin, role: 'ADMIN' } });
     }
 
     // 2. Professor Login
-    const professor = await prisma.professor.findUnique({ where: { email } });
+    const professor = await prisma.professor.findFirst({
+        where: {
+            email: {
+                equals: normalizedEmail,
+                mode: 'insensitive'
+            }
+        }
+    });
     if (professor && await bcrypt.compare(password, professor.senha_hash)) {
         const token = jwt.sign({ id: professor.id, role: 'PROFESSOR', name: professor.nome }, JWT_SECRET);
         return res.json({ token, user: { ...professor, role: 'PROFESSOR' } });
     }
 
     // 3. Aluno Login
-    const student = await prisma.aluno.findUnique({
-        where: { email },
+    const student = await prisma.aluno.findFirst({
+        where: {
+            email: {
+                equals: normalizedEmail,
+                mode: 'insensitive'
+            }
+        },
         include: { turma: true, professor: true }
     });
     if (student && student.senha_hash && await bcrypt.compare(password, student.senha_hash)) {
@@ -157,14 +246,30 @@ app.get('/api/admin/professores', authenticate, authorize(['ADMIN']), asyncHandl
 
 app.post('/api/admin/professores', authenticate, authorize(['ADMIN']), asyncHandler(async (req, res) => {
     const { nome, email, senha } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
+
+    if (!normalizedEmail) {
+        return res.status(400).json({ error: "E-mail é obrigatório" });
+    }
+
+    const existing = await prisma.professor.findFirst({
+        where: {
+            email: {
+                equals: normalizedEmail,
+                mode: 'insensitive'
+            }
+        }
+    });
+    if (existing) return res.status(400).json({ error: "E-mail já cadastrado" });
+
     const defaultPassword = senha || 'senaisaopaulo';
     const hashedPass = await bcrypt.hash(defaultPassword, 10);
     const codigo = await generateUniqueCode();
 
     const professor = await prisma.professor.create({
         data: {
-            nome,
-            email,
+            nome: nome?.trim(),
+            email: normalizedEmail,
             senha_hash: hashedPass,
             codigo_turma: codigo, // Mantido apenas para compatibilidade legada se necessário
             primeiro_acesso: true
@@ -311,9 +416,21 @@ app.delete('/api/alunos/:id', authenticate, authorize(['ADMIN', 'PROFESSOR']), a
 // Aluno registration
 app.post('/api/auth/register-aluno', asyncHandler(async (req, res) => {
     const { nome, email, password, codigo } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
     const normalizedCode = codigo?.trim().toUpperCase();
 
-    const existing = await prisma.aluno.findUnique({ where: { email } });
+    if (!normalizedEmail) {
+        return res.status(400).json({ error: "E-mail é obrigatório" });
+    }
+
+    const existing = await prisma.aluno.findFirst({
+        where: {
+            email: {
+                equals: normalizedEmail,
+                mode: 'insensitive'
+            }
+        }
+    });
     if (existing) return res.status(400).json({ error: "E-mail já cadastrado" });
 
     const turma = await prisma.turma.findUnique({ where: { codigo: normalizedCode } });
@@ -324,7 +441,7 @@ app.post('/api/auth/register-aluno', asyncHandler(async (req, res) => {
     const aluno = await prisma.aluno.create({
         data: {
             nome,
-            email,
+            email: normalizedEmail,
             senha_hash: hashedPass,
             professorId: turma.professorId,
             turmaId: turma.id

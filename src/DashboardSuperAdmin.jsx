@@ -51,7 +51,11 @@ const DashboardSuperAdmin = () => {
         try {
             const res = await authFetch(`${API_URL}/admin/professores`, {
                 method: 'POST',
-                body: JSON.stringify(newProfessor)
+                body: JSON.stringify({
+                    nome: newProfessor.nome?.trim(),
+                    email: newProfessor.email?.trim().toLowerCase(),
+                    senha: newProfessor.senha
+                })
             });
             if (res.ok) {
                 alert('Professor convocado com sucesso!');

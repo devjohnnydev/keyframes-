@@ -354,16 +354,19 @@ const Login = () => {
 
             if (mode === 'REGISTER' && role === 'ALUNO') {
                 await registerStudent({
-                    nome: formData.nome,
-                    email: formData.email,
+                    nome: formData.nome?.trim(),
+                    email: formData.email?.trim().toLowerCase(),
                     password: formData.password,
-                    codigo: formData.codigo
+                    codigo: formData.codigo?.trim().toUpperCase()
                 });
                 alert('Cadastro realizado com sucesso!');
                 return;
             }
 
-            let credentials = { email: formData.email, password: formData.password };
+            let credentials = { 
+                email: formData.email?.trim().toLowerCase(), 
+                password: formData.password 
+            };
             const user = await login(credentials);
 
             if (user && user.role === 'PROFESSOR' && user.primeiro_acesso) {
