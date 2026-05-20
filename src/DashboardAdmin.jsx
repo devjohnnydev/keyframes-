@@ -175,14 +175,20 @@ const DashboardAdmin = () => {
             let finalFotoUrl = profileData.foto_url;
 
             if (selectedFile) {
-                const uploadedUrl = await uploadFile(selectedFile);
-                finalFotoUrl = uploadedUrl;
+                // Convert image file directly to a permanent Base64 string to prevent container-wipe expiries
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = (err) => reject(err);
+                    reader.readAsDataURL(selectedFile);
+                });
+                finalFotoUrl = base64;
             }
 
             await updateProfile({ ...profileData, foto_url: finalFotoUrl });
             setShowProfileEdit(false);
             setSelectedFile(null);
-            alert('Perfil atualizado!');
+            alert('Perfil atualizado com sucesso!');
         } catch (err) {
             alert('Falha ao atualizar perfil: ' + err.message);
         }
