@@ -642,17 +642,35 @@ app.post('/api/missoes', authenticate, authorize(['PROFESSOR']), asyncHandler(as
     });
     if (!turma) return res.status(403).json({ error: "Você não tem permissão para esta turma" });
 
-    const missao = await prisma.missao.create({
-        data: {
-            titulo,
-            descricao,
-            recompensa: parseInt(recompensa) || 0,
-            prazo: prazo ? new Date(prazo) : null,
-            turmaId: parseInt(turmaId),
-            professorId: req.user.id
+    // Robust date parsing to guarantee a valid Date object or null
+    let parsedPrazo = null;
+    if (prazo && typeof prazo === 'string' && prazo.trim() !== '') {
+        const d = new Date(prazo);
+        if (!isNaN(d.getTime())) {
+            parsedPrazo = d;
+        } else {
+            console.warn(`[API] Aviso: Data de prazo inválida fornecida: "${prazo}". Tratando como nula.`);
         }
-    });
-    res.json(missao);
+    }
+
+    try {
+        const missao = await prisma.missao.create({
+            data: {
+                titulo,
+                descricao,
+                recompensa: parseInt(recompensa) || 0,
+                prazo: parsedPrazo,
+                turmaId: parseInt(turmaId),
+                professorId: req.user.id
+            }
+        });
+        res.json(missao);
+    } catch (dbError) {
+        console.error("[API] Erro detalhado no prisma.missao.create:", dbError);
+        return res.status(400).json({
+            error: `Erro no banco de dados (${dbError.code || 'sem código'}): ${dbError.message}`
+        });
+    }
 }));
 
 app.post('/api/missoes/:id/avaliar', authenticate, authorize(['PROFESSOR']), asyncHandler(async (req, res) => {
